@@ -161,6 +161,7 @@ exports.getUser = catchAsyncError(async (req, res, next) => {
   });
 });
 
+
 exports.userCall = catchAsyncError(async (req, res, next) => {
   const {id, recordedTime} = req.body
   const user = await  Client.findById(id);
@@ -171,6 +172,54 @@ user.save()
     user,
   });
 });
+
+exports.getRechargedPackage = async (req, res, next) => {
+  try {
+    const { fixedPrice } = req.body;
+    const user = await Client.findById(req.params.id);
+
+    if (!user) {
+      return `Package not found with this id ${req.params.id}`;
+    }
+    // const fixedPrice = user.packages.fixedPrice
+    const recharge = fixedPrice
+    console.log('fixedPrice',recharge);
+    user.rechargePrice.push({ price: recharge });
+    const calculateTotalAmount = (prices) =>
+    prices.reduce((total, priceObj) => total + Number(priceObj.price || 0), 0).toString();
+    const currentDate = Date.now(); // Assuming currentDate is the current date
+  
+  // Assuming user.rechargePrice is an array of objects with a price property
+  user.balance = calculateTotalAmount(user.rechargePrice);
+  user.rechargePrice.push({ price: fixedPrice, date: currentDate });
+  
+  // If you want to update the user's balance after adding a new price
+  user.balance = calculateTotalAmount(user.rechargePrice);
+  
+
+    // Save the updated package
+    const updatedPackage = await user.save();
+
+    res.status(200).json({
+      success: true,
+      updatedPackage,
+    });
+  } catch (error) {
+    // Handle any errors that occur during the process
+    return `Error in updatePackageAndTotalAmount: ${error.message}`;
+  }
+};
+exports.rechargePackage = async(req,res,next)=>{
+   const{packages}=req.body
+  const user = await  Client.findById(req.params.id);
+   user.packages = packages;
+   user.save()
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+}
 
 // getAlluser -  {{base_url}}/api/v1/user/users
 

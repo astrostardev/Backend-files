@@ -1,4 +1,5 @@
 const express = require("express");
+const jwt = require('jsonwebtoken')
 const app = express()
 const {
   registerAstrologer,
@@ -8,6 +9,7 @@ const {
   activeAstrologer,
   getAstrologerPhone,
   getAstrologer,
+  logoutAstrologer,
 } = require("../controllers/astrologerController");
 
 const multer = require("multer");
@@ -34,19 +36,39 @@ const upload = multer({
     },
   }),
 });
-
+const verification = async(req, res, next)=>{
+  try{
+    let token = req.header("Authorization")
+    if(token && token.startsWith("Bearer ")){
+      token = token.slice(7,token.length).trimLeft();
+      const verified = jwt.verify(token,process.env.JWT_SECRET)
+      req.user = verified
+      console.log(verified);
+      next()
+    }
+    else{
+      res.status(403).send("Access denied")
+    }
+  }catch(err){
+     res.status(400).json({msg:err.message})
+  }
+}
 router.route("/astrologer/register").post(
   upload.fields([{ name: "certificates" }, { name: "profilePic" }]),
 
-  registerAstrologer
+registerAstrologer
 );
-router.route("/astrologer/allAstrologers").get(getAllAstrologers);
 
-router.route("/astrologer/getAstrologer/:id").get(getAstrologer);
-router.route("/astrologer/delete/:id").delete(deleteAstrologer);
+
+router.route("/astrologer/allAstrologers").get(verification,getAllAstrologers);
+router.route("/astrologer/getAstrologer/:id").get(verification,getAstrologer);
+router.route("/astrologer/delete/:id").delete(verification,deleteAstrologer);
 router.route("/astrologer/update/:id").put(
 upload.fields([{ name: "certificates" }, { name: "profilePic" }]),
-updateAstrologer);
-router.route("/astrologer/state/:id").put(activeAstrologer);
+verification,updateAstrologer);
+// router.route("/astrologer/state/:id").put(activeAstrologer);
 router.route("/astrologer/phoneNo").get(getAstrologerPhone)
+router.route("/astrologer/logoutAstrologer").get(logoutAstrologer)
+
+
 module.exports = router;

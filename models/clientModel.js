@@ -19,10 +19,31 @@ const clientSchema = new mongoose.Schema({
         type: Date,
         // default: Date.now,
       }, 
+     packages:{
+     fixedPrice:{type:String},
+     packageName:{type:String},
+     packagePrice:[{price:{type:String}}],
+     packageDetail:{type:String},
+     totalAmount:{type:String},
+     _id:{type:String}
+     },
       callDuration:{
         type:String
-      }
-    
+      },
+      rechargePrice: [
+        {
+          price: {
+            type: String, 
+          },
+          date: {
+            type: Date,
+          },
+        },
+      ],
+      
+    balance:{
+      type:Number
+    }
 })
 clientSchema.methods.getJwtToken = function () {
   const secret = process.env.JWT_SECRET;

@@ -1,9 +1,7 @@
 const express = require('express')
-const{registerAdmin, loginAdmin, logoutAdmin} = require('../controllers/adminController')
+const { createPackages, showPackages, updatePackages, getPackage,deletePackages} = require('../controllers/packageController')
 const router = express.Router()
 const jwt = require('jsonwebtoken')
-
-
 
 const verification = async(req, res, next)=>{
     try{
@@ -12,7 +10,7 @@ const verification = async(req, res, next)=>{
         token = token.slice(7,token.length).trimLeft();
         const verified = jwt.verify(token,process.env.JWT_SECRET)
         req.user = verified
-        console.log('verification',verified);
+        console.log(verified);
         next()
       }
       else{
@@ -22,9 +20,11 @@ const verification = async(req, res, next)=>{
        res.status(400).json({msg:err.message})
     }
   }
-router.route('/admin/register').post(registerAdmin)
-router.route('/admin/login').post(loginAdmin);
-router.route('/admin/logout').get(verification,logoutAdmin);
+router.route('/package/create').post(createPackages)
+router.route('/package/show').get(showPackages)
+router.route('/package/getPackage/:id').get(getPackage)
+router.route('/package/update/:id').patch(updatePackages)
+router.route('/package/delete/:id').delete(deletePackages)
 
 
 module.exports = router

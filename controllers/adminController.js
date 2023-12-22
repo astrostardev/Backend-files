@@ -16,9 +16,16 @@ exports.registerAdmin = catchAsyncError(async (req, res, next) => {
       email,
       password,
   });
+  const secret = process.env.JWT_SECRET;
+  const payload = req.query.mobilePrimary;
+  console.log(req.query);
+  const token = jwt.sign(payload, secret);
+  res.status(200).json({
+    success: true,
+    admin,
+    token, // Include the token in the response if needed
+  });
 
-  // Set cookies and send response
-  sendToken(admin, 201, res);
 });
 
  //loginAdmin - {{base_url}}/api/v1/admin/login
