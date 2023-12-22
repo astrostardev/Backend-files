@@ -21,10 +21,13 @@ app.use('/uploads', express.static(path.join(__dirname,'uploads') ) )
 const user = require('./routes/User')
 const astrologer = require('./routes/astrologer')
 const admin = require('./routes/Admin')
+const package = require('./routes/Package.js')
 
 app.use('/api/v1',user)
 app.use('/api/v1',astrologer)
 app.use('/api/v1',admin);
+app.use('/api/v1',package);
+
 
 app.use(errorMiddleware)
 module.exports = app
