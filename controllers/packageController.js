@@ -3,11 +3,15 @@ const catchAsyncError = require('../middlewares/catchAsyncError')
 
 
 exports.showPackages = catchAsyncError(async(req,res,next)=>{
-    const packages = await Packages.find();
-    res.status(200).json({
-      success:true,
+  const packages = await Packages.find();
+
+  // Set Content-Type to application/json
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+
+  res.status(200).json({
+      success: true,
       packages
-     }) 
+  }); 
   }) 
 
   
