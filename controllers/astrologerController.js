@@ -1,6 +1,6 @@
 const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncError = require("../middlewares/catchAsyncError");
-const Astrologer = require("../models/astroModel");
+const Astrologer = require("../models/astrologerModel");
 const APIFeatures = require("../utils/apiFeatures");
 const sendAstroToken = require("../utils/astroJwt");
 const jwt = require("jsonwebtoken");
@@ -12,24 +12,28 @@ exports.registerAstrologer = catchAsyncError(async (req, res, next) => {
   }
 
   try {
- 
-    const astrologer = await Astrologer.create(req.body);
-    let certificateUrls = [];
+     let certificateUrls = [];
     console.log(req.files);
-    req.files.certificates.forEach((element) => {
-      let astrologerUrl = `${BASE_URL}/uploads/certificates/${element.originalname}`;
+    req.files?.certificates?.forEach((element) => {
+      let astrologerUrl = `${BASE_URL}/uploads/certificates/${element?.originalname}`;
       certificateUrls.push({ file: astrologerUrl });
     });
 
     let picUrls = [];
-    let imagesUrl = `${BASE_URL}/uploads/profilepic/${req.files.profilePic.originalname}`;
+    let imagesUrl = `${BASE_URL}/uploads/profilepic/${req.files?.profilePic?.originalname}`;
     picUrls.push({ pic: imagesUrl });
 
     req.body.certificates = certificateUrls;
     req.body.profilePic = picUrls;
+ 
+    const astrologer = await Astrologer.create(req.body);
+   
     await astrologer.save();
-
-    sendAstroToken(astrologer, 200, res);
+    res.status(200).json({
+      success: true,
+      astrologer,
+    });
+    // sendAstroToken(astrologer, 200, res);
   } catch (error) {
     return next(new ErrorHandler(error.message), 500);
   }
@@ -151,6 +155,51 @@ exports.getAstrologerPhone = async (req, res, next) => {
   }
 };
 
+
+exports.getAstrologerByCategory = async (req, res, next) => {
+  try {
+  
+    const categoryValue = req.query.category; 
+    const regex = new RegExp(categoryValue, 'i');
+    const astrologer = await Astrologer.find({ 'category': regex }); 
+    console.log('cate',req.query);
+    res.status(200).json({
+      success: true,
+      astrologer,
+
+    });
+    
+
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+    });
+  }
+};
+exports.getAstrologerByLanguage= async (req, res, next) => {
+  try {
+  
+    const languageValue = req.query.language; 
+    const regex = new RegExp(languageValue, 'i');
+    const astrologer = await Astrologer.find({ 'language': regex }); 
+    console.log('cate',req.query);
+    res.status(200).json({
+      success: true,
+      astrologer,
+
+    });
+    
+
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+    });
+  }
+};
 exports.logoutAstrologer = (req, res, next) => {
   // Clear the 'token' cookie
   res.cookie('token', null, {

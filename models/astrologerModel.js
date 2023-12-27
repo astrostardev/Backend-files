@@ -1,14 +1,10 @@
 const mongoose = require("mongoose");
 const validator = require('validator');
-//  const {nanoid} = require("nanoid")
 
 const astrologerSchema = new mongoose.Schema({
-  // astrologerID: {
-  //   type: String,
-  //   required: true,
-  //   default: () => nanoid(6),
-  //   index: { unique: true },
-  // },
+  astrologerID:{
+type:String
+  },
   firstname: {
     type: String,
     required: [true, "Please enter firstname"],
@@ -24,7 +20,7 @@ const astrologerSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please enter email"],
     unique: true,
-    validate: [validator.isEmail, "Please enter valid email address"],
+    // validate: [validator.isEmail, "Please enter valid email address"],
   },
   mobilePrimary: {
     type: String,
@@ -111,25 +107,17 @@ chat:{
     type: Boolean,
 
   },
+  category: [],
+  language:[{type:String}],
   createdAt: {
     type: Date,
     default: Date.now,
   },
 
-});
-astrologerSchema.methods.getJwtToken = function () {
-  const secret = process.env.JWT_SECRET;
-  const payload = {
-      astrologerId: this._id,
-      mobilePrimary: this.mobilePrimary,
-      // Other payload data if needed
-  };
-  const options = {
-      expiresIn: process.env.JWT_EXPIRES_IN,
-  };
 
-  return jwt.sign(payload, secret, options);
-};
+});
+
+
 let Astrologer = mongoose.model("Astrologer", astrologerSchema);
 
 module.exports = Astrologer;

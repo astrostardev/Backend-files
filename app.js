@@ -22,11 +22,19 @@ const user = require('./routes/User')
 const astrologer = require('./routes/astrologer')
 const admin = require('./routes/Admin')
 const package = require('./routes/Package.js')
+const method = require('./routes/Method.js')
+const language = require('./routes/language.js')
+
+
 
 app.use('/api/v1',user)
 app.use('/api/v1',astrologer)
 app.use('/api/v1',admin);
 app.use('/api/v1',package);
+app.use('/api/v1',method);
+app.use('/api/v1',language);
+
+
 
 
 app.use(errorMiddleware)

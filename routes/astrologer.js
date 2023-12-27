@@ -10,6 +10,8 @@ const {
   getAstrologerPhone,
   getAstrologer,
   logoutAstrologer,
+  getAstrologerByCategory,
+  getAstrologerByLanguage
 } = require("../controllers/astrologerController");
 
 const multer = require("multer");
@@ -60,14 +62,16 @@ registerAstrologer
 );
 
 
-router.route("/astrologer/allAstrologers").get(verification,getAllAstrologers);
-router.route("/astrologer/getAstrologer/:id").get(verification,getAstrologer);
+router.route("/astrologer/allAstrologers").get(getAllAstrologers);
+router.route("/astrologer/getAstrologer/:id").get(getAstrologer);
 router.route("/astrologer/delete/:id").delete(verification,deleteAstrologer);
 router.route("/astrologer/update/:id").put(
 upload.fields([{ name: "certificates" }, { name: "profilePic" }]),
-verification,updateAstrologer);
+updateAstrologer);
 // router.route("/astrologer/state/:id").put(activeAstrologer);
 router.route("/astrologer/phoneNo").get(getAstrologerPhone)
+router.route("/astrologer/category").get(getAstrologerByCategory)
+router.route("/astrologer/language").get(getAstrologerByLanguage)
 router.route("/astrologer/logoutAstrologer").get(logoutAstrologer)
 
 
