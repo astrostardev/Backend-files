@@ -18,12 +18,23 @@ app.use((req,res,next)=>{
 app.use(requestIp.mw());
 app.use('/uploads', express.static(path.join(__dirname,'uploads') ) )
 
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something went wrong!');
+  });
+  
 const user = require('./routes/User')
 const astrologer = require('./routes/astrologer')
 const admin = require('./routes/Admin')
 const package = require('./routes/Package.js')
 const method = require('./routes/Method.js')
 const language = require('./routes/language.js')
+const product = require('./routes/Product.js')
+const course = require('./routes/Course.js')
+const category = require('./routes/Category.js')
+const courseCategory = require('./routes/courseCategory.js')
+
+
 
 
 
@@ -33,6 +44,11 @@ app.use('/api/v1',admin);
 app.use('/api/v1',package);
 app.use('/api/v1',method);
 app.use('/api/v1',language);
+app.use('/api/v1',product);
+app.use('/api/v1',category);
+app.use('/api/v1',course);
+app.use('/api/v1/',courseCategory)
+
 
 
 
