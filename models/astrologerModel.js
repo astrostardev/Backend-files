@@ -13,6 +13,10 @@ type:String
     type: String,
     required: [true, "Please enter lastname"],
   },
+  displayname: {
+    type: String,
+    required: [true, "Please enter lastname"],
+  },
   dob: {
     type: String,
   },
@@ -70,6 +74,9 @@ type:String
   astrologyDescription: {
     type: String,
   },
+  biograph:{
+    type:String
+  },
   astrologyExperience: {
     type: String,
   },
@@ -83,7 +90,7 @@ type:String
     type: String,
   },
 
-  certificates: [
+  certificatePic: [
     {
       file: {
         type: String,
@@ -91,6 +98,20 @@ type:String
     }
   ],
   profilePic: [
+    {
+      pic: {
+        type: String
+      }
+    }
+  ],
+  aadharPic: [
+    {
+      pic: {
+        type: String
+      }
+    }
+  ],
+ panPic: [
     {
       pic: {
         type: String

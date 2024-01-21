@@ -12,32 +12,52 @@ exports.registerAstrologer = catchAsyncError(async (req, res, next) => {
   }
 
   try {
-     let certificateUrls = [];
-    console.log(req.files);
-    req.files?.certificates?.forEach((element) => {
-      let astrologerUrl = `${BASE_URL}/uploads/certificates/${element?.originalname}`;
-      certificateUrls.push({ file: astrologerUrl });
-    });
-
+    let certificateUrls = [];
     let picUrls = [];
-    let imagesUrl = `${BASE_URL}/uploads/profilepic/${req.files?.profilePic?.originalname}`;
-    picUrls.push({ pic: imagesUrl });
+    let aadharUrls = [];
+    let pancardUrls = [];
 
-    req.body.certificates = certificateUrls;
+    if (req.files['certificatePic']) {
+      certificateUrls = req.files['certificatePic'].map(file => ({
+        file: `${BASE_URL}/uploads/certificates/${file.originalname}`
+      }));
+    }
+
+    if (req.files['profilePic']) {
+      picUrls = req.files['profilePic'].map(file => ({
+        pic: `${BASE_URL}/uploads/profilepic/${file.originalname}`
+      }));
+    }
+
+    if (req.files['aadharPic']) {
+      aadharUrls = req.files['aadharPic'].map(file => ({
+        pic: `${BASE_URL}/uploads/aadharImage/${file.originalname}`
+      }));
+    }
+
+    if (req.files['panPic']) {
+      pancardUrls = req.files['panPic'].map(file => ({
+        pic: `${BASE_URL}/uploads/pancardImage/${file.originalname}`
+      }));
+    }
+
+    req.body.certificatePic = certificateUrls;
     req.body.profilePic = picUrls;
- 
+    req.body.aadharPic = aadharUrls;
+    req.body.panPic = pancardUrls;
+
     const astrologer = await Astrologer.create(req.body);
-   
+
     await astrologer.save();
     res.status(200).json({
       success: true,
       astrologer,
     });
-    // sendAstroToken(astrologer, 200, res);
   } catch (error) {
     return next(new ErrorHandler(error.message), 500);
   }
 });
+
 
 //updateAstrologer - {{base_url}}/api/v1/astrologer/update/:id
 exports.updateAstrologer = catchAsyncError(async (req, res, next) => {
@@ -54,13 +74,17 @@ exports.updateAstrologer = catchAsyncError(async (req, res, next) => {
     experience,
     course,
     institute,
-    certificates,
+    certificatePic,
     astrologyDescription,
     astrologyExperience,
     astrologyExpertise,
+    biograph,
     knowus,
     maxTime,
     isActive,
+    profilePic,
+    aadharPic,
+    panPic,
   } = req.body);
   const astrologer = await Astrologer.findByIdAndUpdate(
     req.params.id,
@@ -134,18 +158,15 @@ exports.getAstrologerPhone = async (req, res, next) => {
 
     const data = astrologer.map((astrologer) => `${astrologer.isActive}`);
     console.log(data);
-    if(data == false){
-       console.log('Astrologer cant login contact admin');
+    if (data == false) {
+      console.log("Astrologer cant login contact admin");
+    } else {
+      res.status(200).json({
+        success: true,
+        astrologer,
+        token,
+      });
     }
-    else{
-
-    res.status(200).json({
-      success: true,
-      astrologer,
-      token,
-    });
-    }
-
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({
@@ -154,22 +175,17 @@ exports.getAstrologerPhone = async (req, res, next) => {
     });
   }
 };
-
 
 exports.getAstrologerByCategory = async (req, res, next) => {
   try {
-  
-    const categoryValue = req.query.category; 
-    const regex = new RegExp(categoryValue, 'i');
-    const astrologer = await Astrologer.find({ 'category': regex }); 
-    console.log('cate',req.query);
+    const categoryValue = req.query.category;
+    const regex = new RegExp(categoryValue, "i");
+    const astrologer = await Astrologer.find({ category: regex });
+    console.log("cate", req.query);
     res.status(200).json({
       success: true,
       astrologer,
-
     });
-    
-
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({
@@ -178,20 +194,16 @@ exports.getAstrologerByCategory = async (req, res, next) => {
     });
   }
 };
-exports.getAstrologerByLanguage= async (req, res, next) => {
+exports.getAstrologerByLanguage = async (req, res, next) => {
   try {
-  
-    const languageValue = req.query.language; 
-    const regex = new RegExp(languageValue, 'i');
-    const astrologer = await Astrologer.find({ 'language': regex }); 
-    console.log('cate',req.query);
+    const languageValue = req.query.language;
+    const regex = new RegExp(languageValue, "i");
+    const astrologer = await Astrologer.find({ language: regex });
+    console.log("cate", req.query);
     res.status(200).json({
       success: true,
       astrologer,
-
     });
-    
-
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({
@@ -202,7 +214,7 @@ exports.getAstrologerByLanguage= async (req, res, next) => {
 };
 exports.logoutAstrologer = (req, res, next) => {
   // Clear the 'token' cookie
-  res.cookie('token', null, {
+  res.cookie("token", null, {
     expires: new Date(Date.now()),
     httpOnly: true,
   });
@@ -217,4 +229,3 @@ exports.logoutAstrologer = (req, res, next) => {
     token: token, // Include the token in the response if needed
   });
 };
- 
