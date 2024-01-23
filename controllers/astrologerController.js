@@ -64,6 +64,7 @@ exports.updateAstrologer = catchAsyncError(async (req, res, next) => {
   const newUserData = ({
     firstname,
     lastname,
+    displayname,
     dob,
     email,
     mobilePrimary,
@@ -86,14 +87,44 @@ exports.updateAstrologer = catchAsyncError(async (req, res, next) => {
     aadharPic,
     panPic,
   } = req.body);
+  let BASE_URL = process.env.BACKEND_URL;
+  if (process.env.NODE_ENV === "production") {
+    BASE_URL = `${req.protocol}://${req.get("host")}`;
+  }
+  
+  const updateFields = {};
+
+  if (req.files['certificatePic']) {
+    updateFields.certificatePic = req.files['certificatePic'].map(file => ({
+      file: `${BASE_URL}/uploads/certificates/${file.originalname}`
+    }));
+  } 
+  
+  if (req.files['profilePic']) {
+    updateFields.profilePic = req.files['profilePic'].map(file => ({
+      pic: `${BASE_URL}/uploads/profilepic/${file.originalname}`
+    }));
+  }
+  if (req.files['aadharPic']) {
+    updateFields.aadharPic = req.files['aadharPic'].map(file => ({
+      pic: `${BASE_URL}/uploads/aadharImage/${file.originalname}`
+    }));
+  } 
+  if (req.files['panPic']) {
+    updateFields.panPic = req.files['panPic'].map(file => ({
+      pic: `${BASE_URL}/uploads/pancardImage/${file.originalname}`
+    }));
+  } 
+  console.log(updateFields);
   const astrologer = await Astrologer.findByIdAndUpdate(
     req.params.id,
-    newUserData,
-    {
-      new: true,
-      runValidators: true,
-    }
+     { $set: updateFields },
+    // { ...req.body,updateFields },
+    { new: true, runValidators: true }
   );
+  
+   
+  
 
   res.status(200).json({
     success: true,

@@ -8,12 +8,14 @@ exports.createProduct = catchAsyncError(async (req, res, next) => {
   if (process.env.NODE_ENV === "production") {
     BASE_URL = `${req.protocol}://${req.get("host")}`;
   }
-  const reqfiles = req.files;
-  console.log("files", reqfiles);
-  req.files.forEach((file) => {
-    let url = `${BASE_URL}/uploads/ProductImages/${file.originalname}`;
-    images.push({ image: url });
-  });
+ 
+  if (req.files['images']) {
+    images = req.files['images'].map(file => ({
+      file: `${BASE_URL}/uploads/ProductImages/${file.originalname}`
+    }));
+  }
+  req.body.images = images;
+
   const { productname } = req.body.productname;
   const existingProduct = await Product.findOne({ productname: productname });
 
@@ -63,23 +65,29 @@ exports.updateProduct = catchAsyncError(async (req, res, next) => {
     description,
     category,
     isActive,
+    images
   } = req.body);
-  let images = [];
   let BASE_URL = process.env.BACKEND_URL;
 
   if (process.env.NODE_ENV === "production") {
     BASE_URL = `${req.protocol}://${req.get("host")}`;
   }
-  const reqfiles = req.files;
-  console.log("files", reqfiles);
-  req.files.forEach((file) => {
-    let url = `${BASE_URL}/uploads/ProductImages/${file.originalname}`;
-    images.push({ image: url });
-  });
+  
+  const updateFields = {};
+  
+  if (req.files['images']) {
+    updateFields.images = req.files['images'].map(file => ({
+      file: `${BASE_URL}/uploads/ProductImages/${file.originalname}`
+    }));
+  }
+  
+  
   req.body.images = images;
   const upproduct = await Product.findByIdAndUpdate(
     req.params.id,
     newProductData,
+    { ...req.body, ...updateFields },
+
     {
       new: true,
       runValidators: true,

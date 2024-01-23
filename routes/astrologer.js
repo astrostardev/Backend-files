@@ -73,7 +73,8 @@ router.route("/astrologer/allAstrologers").get(getAllAstrologers);
 router.route("/astrologer/getAstrologer/:id").get(getAstrologer);
 router.route("/astrologer/delete/:id").delete(verification,deleteAstrologer);
 router.route("/astrologer/update/:id").put(
-upload.fields([{ name: "certificatePic" }, { name: "profilePic" },{ name: "aadharPic" },{ name: "panPic" }]),
+  upload.fields([{ name: "certificatePic" }, { name: "profilePic" },{ name: "aadharPic" },{ name: "panPic" }]),
+
 updateAstrologer);
 // router.route("/astrologer/state/:id").put(activeAstrologer);
 router.route("/astrologer/phoneNo").get(getAstrologerPhone)

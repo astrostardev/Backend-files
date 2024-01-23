@@ -41,7 +41,7 @@ const verification = async(req, res, next)=>{
 router.route('/product/create').post(upload.array('images'),createProduct)
 router.route('/product/show').get(showProducts)
 router.route('/product/get/:id').get(getProduct)
-router.route('/product/update/:id').put(updateProduct)
+router.route('/product/update/:id').put(upload.array('images'),updateProduct)
 router.route('/product/delete/:id').delete(deleteProduct)
 
 
