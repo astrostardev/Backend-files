@@ -59,46 +59,44 @@ exports.getProduct = catchAsyncError(async (req, res, next) => {
   });
 });
 exports.updateProduct = catchAsyncError(async (req, res, next) => {
-  const newProductData = ({
-    productname,
-    price,
-    description,
-    category,
-    isActive,
-    images
-  } = req.body);
+  let product = await Product.findById(req.params.id);
+  
+  let images = []
+  if(req.body.imagesCleared === 'false' ) {
+    images = product.images;
+   }
+  
   let BASE_URL = process.env.BACKEND_URL;
-
-  if (process.env.NODE_ENV === "production") {
-    BASE_URL = `${req.protocol}://${req.get("host")}`;
-  }
-  
-  const updateFields = {};
-  
-  if (req.files['images']) {
-    updateFields.images = req.files['images'].map(file => ({
-      file: `${BASE_URL}/uploads/ProductImages/${file.originalname}`
-    }));
-  }
-  
-  
-  req.body.images = images;
-  const upproduct = await Product.findByIdAndUpdate(
-    req.params.id,
-    newProductData,
-    { ...req.body, ...updateFields },
-
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
+if(process.env.NODE_ENV === "production"){
+  BASE_URL = `${req.protocol}://${req.get('host')}`
+}
+if(req.files.length > 0) {
+  req.files.forEach( file => {
+      let url = `${BASE_URL}/uploads/ProductImages/${file.originalname}`;
+      images.push({ image: url })
+  })
+}
 
 
-  res.status(200).json({
-    success: true,
-    upproduct,
-  });
+req.body.images = images;
+if(!product) {
+return res.status(404).json({
+    success: false,
+    message: "Product not found"
+});
+}
+
+product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+new: true,
+runValidators: true
+})
+
+res.status(200).json({
+success: true,
+product
+})
+
+
 });
 
 exports.deleteProduct = catchAsyncError(async (req, res, next) => {

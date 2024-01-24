@@ -94,27 +94,35 @@ type:String
     {
       file: {
         type: String,
+        required: [true, " Please upload Certificate"],
+
       }
     }
   ],
   profilePic: [
     {
       pic: {
-        type: String
+        type: String,
+        required: [true, " Please upload Profile Image"],
+
       }
     }
   ],
   aadharPic: [
     {
       pic: {
-        type: String
+        type: String,
+        required: [true, " Please upload aadhar Image"],
+
       }
     }
   ],
  panPic: [
     {
       pic: {
-        type: String
+        type: String,
+        required: [true, " Please upload PanCard Image"],
+
       }
     }
   ],

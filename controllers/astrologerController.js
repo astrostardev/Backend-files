@@ -61,32 +61,7 @@ exports.registerAstrologer = catchAsyncError(async (req, res, next) => {
 
 //updateAstrologer - {{base_url}}/api/v1/astrologer/update/:id
 exports.updateAstrologer = catchAsyncError(async (req, res, next) => {
-  const newUserData = ({
-    firstname,
-    lastname,
-    displayname,
-    dob,
-    email,
-    mobilePrimary,
-    mobileSecondary,
-    address,
-    gender,
-    qualifications,
-    experience,
-    course,
-    institute,
-    certificatePic,
-    astrologyDescription,
-    astrologyExperience,
-    astrologyExpertise,
-    biograph,
-    knowus,
-    maxTime,
-    isActive,
-    profilePic,
-    aadharPic,
-    panPic,
-  } = req.body);
+ 
   let BASE_URL = process.env.BACKEND_URL;
   if (process.env.NODE_ENV === "production") {
     BASE_URL = `${req.protocol}://${req.get("host")}`;
@@ -118,14 +93,9 @@ exports.updateAstrologer = catchAsyncError(async (req, res, next) => {
   console.log(updateFields);
   const astrologer = await Astrologer.findByIdAndUpdate(
     req.params.id,
-     { $set: updateFields },
-    // { ...req.body,updateFields },
+    { ...req.body,...updateFields },
     { new: true, runValidators: true }
   );
-  
-   
-  
-
   res.status(200).json({
     success: true,
     astrologer,

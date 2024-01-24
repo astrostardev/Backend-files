@@ -50,46 +50,44 @@ exports.showCourses = catchAsyncError(async(req,res,next)=>{
       }); 
       }) 
       exports.updateCourse = catchAsyncError(async (req, res, next) => {
-        const newCourseData = ({
-          coursename,
-          price,
-          description,
-          category,
-          isActive,
-          images
-        } = req.body);
+        let course = await Course.findById(req.params.id);
+    let images = []
+      
+        if(req.body.imagesCleared === 'false' ) {
+          images = course.images;
+      }
+        
         let BASE_URL = process.env.BACKEND_URL;
+    if(process.env.NODE_ENV === "production"){
+        BASE_URL = `${req.protocol}://${req.get('host')}`
+    }
+    if(req.files.length > 0) {
+        req.files.forEach( file => {
+            let url = `${BASE_URL}/uploads/courseImages/${file.originalname}`;
+            images.push({ image: url })
+        })
+    }
+
+
+    req.body.images = images;
+    if(!course) {
+      return res.status(404).json({
+          success: false,
+          message: "Course not found"
+      });
+  }
+
+  course = await Course.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true
+  })
+
+  res.status(200).json({
+      success: true,
+      course
+  })
       
-        if (process.env.NODE_ENV === "production") {
-          BASE_URL = `${req.protocol}://${req.get("host")}`;
-        }
-        
-        const updateFields = {};
-        
-        if (req.files['images']) {
-          updateFields.images = req.files['images'].map(file => ({
-            file: `${BASE_URL}/uploads/courseImages/${file.originalname}`
-          }));
-        }
-        
-        
-        req.body.images = images;
-        const course = await Course.findByIdAndUpdate(
-          req.params.id,
-          newCourseData,
-          { ...req.body, ...updateFields },
-      
-          {
-            new: true,
-            runValidators: true,
-          }
-        );
-      
-      
-        res.status(200).json({
-          success: true,
-          course,
-        });
+     
       });
     exports.deleteCourse = catchAsyncError(async (req, res, next) => {
         const course = await  Course.findById(req.params.id);
