@@ -37,30 +37,28 @@ const verification = async(req, res, next)=>{
      res.status(400).json({msg:err.message})
   }
 }
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: function (req, file, cb) {
-      // You can choose the destination based on the file type or other conditions
-      if (file.fieldname === "certificatePic") {
-        cb(null, path.join(__dirname, "..", "uploads/certificates"));
-      } else if (file.fieldname === "profilePic") {
-        cb(null, path.join(__dirname, "..", "uploads/profilepic"));
-      } 
-      else if (file.fieldname === "aadharPic") {
-        cb(null, path.join(__dirname, "..", "uploads/aadharImage"));
-      }
-      else if (file.fieldname === "panPic") {
-        cb(null, path.join(__dirname, "..", "uploads/pancardImage"));
-      }else {
-        
-        cb(new Error("Invalid fieldname for destination"));
-      }
-    },
-    filename: function (req, file, cb) {
-      cb(null,  file.originalname);
-    },
-  }),
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    // You can choose the destination based on the file type or other conditions
+    if (file.fieldname === "certificatePic") {
+      cb(null, path.join(__dirname, "..", "uploads/certificates"));
+    } else if (file.fieldname === "profilePic") {
+      cb(null, path.join(__dirname, "..", "uploads/profilepic"));
+    } else if (file.fieldname === "aadharPic") {
+      cb(null, path.join(__dirname, "..", "uploads/aadharImage"));
+    } else if (file.fieldname === "panPic") {
+      cb(null, path.join(__dirname, "..", "uploads/pancardImage"));
+    } else {
+      cb(new Error("Invalid fieldname for destination"));
+    }
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
 });
+
+const upload = multer({ storage: storage });
+
 
 router.route("/astrologer/register").post(
   upload.fields([{ name: "certificatePic" }, { name: "profilePic" },{ name: "aadharPic" },{ name: "panPic" }]),

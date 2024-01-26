@@ -132,6 +132,12 @@ call:{
 chat:{
   type:String
 },
+displaycall:{
+  type:String
+},
+displaychat:{
+  type:String
+},
   isActive: {
     type: Boolean,
 
