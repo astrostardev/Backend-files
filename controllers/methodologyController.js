@@ -8,12 +8,14 @@ exports.createCategory = async (req, res, next) => {
       if (process.env.NODE_ENV === 'production') {
         BASE_URL = `${req.protocol}://${req.get('host')}`;
       }
-  
-      // Check if the Clientalready exists
-      const existingCategory = await  Methodology.findOne({ category: req.body.category });
-  
+      const categoryName = req.body.category.name
+      const existingCategory = await Methodology.findOne({
+        'language.name': { $regex: new RegExp(categoryName, 'i') }
+      });
+   
+      
       if (existingCategory) {
-        // Clientis already registered
+        // Category already exists
         return res.status(409).json({
           success: false,
           message: 'Category already registered',
@@ -66,19 +68,36 @@ exports.showCategory = catchAsyncError(async(req,res,next)=>{
           category
       }); 
       }) 
-    exports.updateCategory = catchAsyncError(async(req,res,next)=>{
-       const{category} = req.body
-         const upcategory = await Methodology.findByIdAndUpdate(req.params.id,category,{
-          new:true,
-          runValidators: true,
-        })
-      
-        res.status(200).json({
-          success:true,
-          upcategory
-         }) 
-    })
+      exports.updateCategory = catchAsyncError(async (req, res, next) => {
+        const { category } = req.body;
+        const categoryName = category.category[0].name;
     
+        // Check if the category with the given name (case-insensitive) already exists
+        const existingCategory = await Methodology.findOne({
+            'category.name': { $regex: new RegExp(categoryName, 'i') }
+        });
+    
+        if (existingCategory) {
+            // Category already exists
+            return res.status(409).json({
+                success: false,
+                message: 'Category already registered',
+            });
+        }
+    
+        // If category doesn't exist, proceed with the update
+        const upcategory = await Methodology.findByIdAndUpdate(req.params.id, category, {
+            new: true,
+            runValidators: true,
+        });
+    
+        res.status(200).json({
+            success: true,
+            upcategory
+        });
+    });
+    
+     
     exports.deleteCategory= catchAsyncError(async (req, res, next) => {
         const category = await  Methodology.findById(req.params.id);
     

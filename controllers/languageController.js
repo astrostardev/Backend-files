@@ -8,15 +8,17 @@ exports.createLanguage = async (req, res, next) => {
       if (process.env.NODE_ENV === 'production') {
         BASE_URL = `${req.protocol}://${req.get('host')}`;
       }
-  
-      // Check if the Clientalready exists
-      const existingLanguage = await  Language.findOne({ language: req.body.language });
-  
+      const languageName = req.body.language.name
+      const existingLanguage = await Language.findOne({
+        'language.name': { $regex: new RegExp(languageName, 'i') }
+      });
+      
+      
       if (existingLanguage) {
-        // Clientis already registered
+        // Category already exists
         return res.status(409).json({
           success: false,
-          message: 'Category already registered',
+          message: 'language already exist',
         });
       }
   
@@ -68,19 +70,33 @@ exports.getLanguage = catchAsyncError(async(req,res,next)=>{
   }); 
   }) 
 
-    exports.updateLanguage = catchAsyncError(async(req,res,next)=>{
-      const language = req.body.language
-        const uplanguage = await Language.findByIdAndUpdate(req.params.id,{$set:language},{
-         new:true,
-         runValidators: true,
-       })
-     
-       res.status(200).json({
-         success:true,
-         uplanguage
-        }) 
-   })
-    
+  exports.updateLanguage = catchAsyncError(async(req,res,next)=>{
+    const{language} = req.body
+    console.log('hi', language.language[0].name);
+const languageName = language.language[0].name
+    const existingCategory = await Language.findOne({
+      'language.name': { $regex: new RegExp(languageName, 'i') }
+    });
+   if (existingCategory) {
+     // Category already exists
+     return res.status(409).json({
+       success: false,
+       message: 'Category already registered',
+     });
+   }
+      const upcategory = await Language.findByIdAndUpdate(req.params.id,language,{
+       new:true,
+       runValidators: true,
+     })
+   
+     res.status(200).json({
+       success:true,
+       upcategory
+      }) 
+ })
+ 
+
+
     exports.deleteLanguage= catchAsyncError(async (req, res, next) => {
         const language = await  Language.findById(req.params.id);
     

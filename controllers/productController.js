@@ -16,16 +16,21 @@ exports.createProduct = catchAsyncError(async (req, res, next) => {
   }
   req.body.images = images;
 
-  const { productname } = req.body.productname;
-  const existingProduct = await Product.findOne({ productname: productname });
+  const { productname } = req.body;
+console.log('hi', productname);
 
-  if (existingProduct) {
-    // Clientis already registered
+const existingProduct = await Product.findOne({ productname: { $regex: new RegExp(productname, 'i') } });
+
+if (existingProduct) {
+    // Product already exists
     return res.status(409).json({
-      success: false,
-      message: "Product already created",
+        success: false,
+        message: 'Product already registered',
     });
-  }
+}
+
+
+
 
   req.body.images = images;
   console.log(req.body);
@@ -84,6 +89,19 @@ return res.status(404).json({
     success: false,
     message: "Product not found"
 });
+}
+
+const { productname } = req.body;
+console.log('hi', productname);
+
+const existingProduct = await Product.findOne({ productname: { $regex: new RegExp(productname, 'i') } });
+
+if (existingProduct) {
+    // Product already exists
+    return res.status(409).json({
+        success: false,
+        message: 'Product already registered',
+    });
 }
 
 product = await Product.findByIdAndUpdate(req.params.id, req.body, {

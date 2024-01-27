@@ -19,7 +19,7 @@ exports.registerUser = async (req, res, next) => {
       // Clientis already registered
       return res.status(409).json({
         success: false,
-        message: 'User already registered',
+        message: 'User already registered please Login',
       });
     }
 

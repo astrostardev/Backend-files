@@ -17,6 +17,19 @@ exports.createCourse = catchAsyncError(async (req, res, next)=>{
     }
     req.body.images = images;
 
+const { coursename } = req.body;
+console.log('hi', coursename);
+
+const existingCourse = await Course.findOne({ coursename: { $regex: new RegExp(coursename, 'i') } });
+
+if (existingCourse) {
+    // Product already exists
+    return res.status(409).json({
+        success: false,
+        message: 'Course already registered',
+    });
+}
+
    console.log('responds',req.body);
     const course = await Course.create(req.body);
     res.status(201).json({
@@ -76,6 +89,19 @@ exports.showCourses = catchAsyncError(async(req,res,next)=>{
           message: "Course not found"
       });
   }
+
+const { coursename } = req.body;
+console.log('hi', coursename);
+
+const existingCourse = await Course.findOne({ coursename: { $regex: new RegExp(coursename, 'i') } });
+
+if (existingCourse) {
+    // Product already exists
+    return res.status(409).json({
+        success: false,
+        message: 'Course already registered',
+    });
+}
 
   course = await Course.findByIdAndUpdate(req.params.id, req.body, {
       new: true,

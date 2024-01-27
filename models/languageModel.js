@@ -4,7 +4,7 @@ const languageSchema = new mongoose.Schema({
     language: [{
         name:{
             type: String,
-            required: [true, "Please enter product category"],
+            required: [true, "Please enter language"],
             
         }
        

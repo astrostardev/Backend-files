@@ -8,12 +8,14 @@ exports.createCourseCategory = async (req, res, next) => {
     if (process.env.NODE_ENV === 'production') {
       BASE_URL = `${req.protocol}://${req.get('host')}`;
     }
-
-    // Check if the Clientalready exists
-    const existingCategory = await  CourseCategory.findOne({ category: req.body.category });
-
+    const categoryName = req.body.category.name
+    const existingCategory = await CourseCategory.findOne({
+      'category.name': { $regex: new RegExp(categoryName, 'i') }
+    });
+ 
+    
     if (existingCategory) {
-      // Clientis already registered
+      // Category already exists
       return res.status(409).json({
         success: false,
         message: 'Category already registered',
@@ -24,9 +26,9 @@ exports.createCourseCategory = async (req, res, next) => {
     // If Clientdoesn't exist, create a new user
     const category= await CourseCategory.create(req.body);
     console.log(req.body);
-    // const date = new Date().toString()
-    // category.date = date
-    // category.save()
+    const date = new Date().toString()
+    category.date = date
+    category.save()
 
     res.status(200).json({
       success: true,
@@ -65,18 +67,35 @@ exports.showCoursesCategory = catchAsyncError(async(req,res,next)=>{
           courseCategory
       }); 
       }) 
-      exports.updateCourseCategory = catchAsyncError(async(req,res,next)=>{
-        const{category} = req.body
-          const upcategory = await CourseCategory.findByIdAndUpdate(req.params.id,category,{
-           new:true,
-           runValidators: true,
-         })
-       
-         res.status(200).json({
-           success:true,
-           upcategory
-          }) 
-     })
+      exports.updateCourseCategory = catchAsyncError(async (req, res, next) => {
+        const { category } = req.body;
+        const categoryName = category.category[0].name;
+    
+        // Check if the category with the given name (case-insensitive) already exists
+        const existingCategory = await CourseCategory.findOne({
+            'category.name': { $regex: new RegExp(categoryName, 'i') }
+        });
+    
+        if (existingCategory) {
+            // Category already exists
+            return res.status(409).json({
+                success: false,
+                message: 'Category already registered',
+            });
+        }
+    
+        // If category doesn't exist, proceed with the update
+        const upcategory = await CourseCategory.findByIdAndUpdate(req.params.id, category, {
+            new: true,
+            runValidators: true,
+        });
+    
+        res.status(200).json({
+            success: true,
+            upcategory
+        });
+    });
+    
      
     exports.deleteCourseCategory = catchAsyncError(async (req, res, next) => {
         const course = await  CourseCategory.findById(req.params.id);
