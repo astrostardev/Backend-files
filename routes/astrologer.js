@@ -80,8 +80,8 @@ updateAstrologer);
 // router.route("/astrologer/state/:id").put(activeAstrologer);
 router.route("/astrologer/phoneNo").get(getAstrologerPhone)
 router.route("/astrologer/available/:id").post(availableAstrologer)
-router.route("/astrologer/call_available").get(verification,getAvailableAstrologerByCall)
-router.route("/astrologer/chat_available").get(verification,getAvailableAstrologerByChat)
+router.route("/astrologer/call_available").get(getAvailableAstrologerByCall)
+router.route("/astrologer/chat_available").get(getAvailableAstrologerByChat)
 router.route("/astrologer/category").get(getAstrologerByCategory)
 router.route("/astrologer/language").get(getAstrologerByLanguage)
 router.route("/astrologer/logoutAstrologer").get(logoutAstrologer)
