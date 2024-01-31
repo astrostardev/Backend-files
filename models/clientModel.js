@@ -6,11 +6,37 @@ const clientSchema = new mongoose.Schema({
        type:String,
     //    required:[true,'Please enter name'] 
     },
+    dob:{
+      type:String
+    },
+    email:{type:String},
     phoneNo:{
         type:String,
         required:[true,'Please enter mobile-no'],
         unique:[true,'Mobile no alreday exist']
     },
+    placeOfbirth:{
+      type:String
+    },
+    postalCode:{
+      type:String
+    },
+    city:{
+     type:String
+    },
+    state:{
+      type:String
+     },
+     country:{
+    type:String
+     },
+     gender: {
+      type: String,
+  
+    },
+     address:{
+   type:String
+     },
     registerTime: {
         type: Date,
         // default: Date.now,

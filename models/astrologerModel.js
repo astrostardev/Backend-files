@@ -148,8 +148,15 @@ displaychat:{
     type: Date,
     default: Date.now,
   },
-
-
+callAvailable:{
+  type:Boolean
+},
+chatAvailable:{
+  type:Boolean
+},
+emergencyCallAvailable:{
+  type:Boolean
+}
 });
 
 

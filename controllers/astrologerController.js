@@ -235,3 +235,58 @@ exports.logoutAstrologer = (req, res, next) => {
     token: token, // Include the token in the response if needed
   });
 };
+exports.availableAstrologer = catchAsyncError(async (req, res, next) => {
+  const astrologer = await Astrologer.findById(req.params.id);
+  if (!astrologer) {
+    return next(
+      new ErrorHandler(`User not found with this id ${req.params.id}`)
+    );
+  }
+  const {callAvailable,emergencyCallAvailable,chatAvailable} =req.body
+
+  astrologer.callAvailable = callAvailable
+  astrologer.chatAvailable = chatAvailable
+  astrologer.emergencyCallAvailable = emergencyCallAvailable
+
+  astrologer.save()
+
+  res.status(200).json({
+    success: true,
+    astrologer,
+  });
+});
+exports.getAvailableAstrologerByCall = async (req, res, next) => {
+  try {
+    // const callAvailable = req.query.callAvailable === 'true'; // Check for the string 'true'
+    const astrologers = await Astrologer.find({ callAvailable: true });
+    
+    res.status(200).json({
+      success: true,
+      astrologers,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+    });
+  }
+};
+
+exports.getAvailableAstrologerByChat = async (req, res, next) => {
+  try {
+    // const chatAvailable = req.query.chatAvailable == 'true';
+    const astrologers = await Astrologer.find({ chatAvailable: true });
+    console.log("cate", req.query);
+    res.status(200).json({
+      success: true,
+      astrologers,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+    });
+  }
+};

@@ -232,22 +232,53 @@ exports.getAllUser = catchAsyncError(async(req,res,next)=>{
   })
 // updateuser -  {{base_url}}/api/v1/user/update/:id
 
-  exports.updateUser = catchAsyncError(async(req,res,next)=>{
-    const newUserData = {
-      name:req.body.name,
-      email: req.body.email,
-    //   role: req.body.role
-    }
-     const user = await Client.findByIdAndUpdate(req.params.id,newUserData,{
-      new:true,
+exports.updateUser = catchAsyncError(async (req, res, next) => {
+  const user = await Client.findById(req.params.id)
+  console.log('user id',req.params.id);
+if(!user){
+  console.log('user not find');
+}else{
+  console.log('user found',user);
+}
+  console.log('userDetail', req.body);
+  const { name, dob, placeOfbirth, address, city,country,state,email,postalCode,gender } = req.body; // Destructure properties from req.body
+
+  const userProfile = {
+    name,
+    dob,
+    placeOfbirth,
+    address,
+    city,
+    country,
+    state,
+    email,
+    postalCode,
+    gender 
+  };
+
+  try {
+    const user = await Client.findByIdAndUpdate(req.params.id, userProfile, {
+      new: true,
       runValidators: true,
-    })
-  
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
     res.status(200).json({
-      success:true,
-      user
-     }) 
-  })
+      success: true,
+      user,
+    });
+  } catch (error) {
+    // Handle any errors that occurred during the update
+    next(error);
+  }
+});
+
   
 // deleteuser -  {{base_url}}/api/v1/user/delete/:id
 

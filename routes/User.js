@@ -40,6 +40,6 @@ router.route('/user/logout').get(logoutUser)
 router.route('/user/users').get(verification,getAllUser)
 router.route('/user/callDuration').post(verification,userCall)
 
-router.route('/user/update/:id').patch(verification,updateUser)
+router.route('/user/update/:id').put(verification,updateUser)
 router.route('/user/delete/:id').delete(verification,deleteUser)
 module.exports = router;
