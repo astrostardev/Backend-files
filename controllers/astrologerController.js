@@ -200,6 +200,24 @@ exports.getAstrologerByCategory = async (req, res, next) => {
     });
   }
 };
+exports.searchAstrologerByName = async (req, res, next) => {
+  try {
+    const displayName = req.query.search;
+    const regex = new RegExp(displayName, "i");
+    const astrologer = await Astrologer.find({ displayname: regex });
+    console.log("cate", req.query);
+    res.status(200).json({
+      success: true,
+      astrologer,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+    });
+  }
+};
 exports.getAstrologerByLanguage = async (req, res, next) => {
   try {
     const languageValue = req.query.language;
