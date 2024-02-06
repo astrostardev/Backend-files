@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer')
 const jwt = require('jsonwebtoken')
 
-const {registerUser, getAllUser, updateUser, deleteUser, loginUser, getUserPhone, getUser, userCall, logoutUser, rechargePackage, getRechargedPackage} = require('../controllers/userController')
+const {registerUser, getAllUser, updateUser, deleteUser, loginUser, getUserPhone, getUser, userCall, logoutUser, rechargePackage, getRechargedPackage, createUserProfile} = require('../controllers/userController')
 const router = express.Router();
 
 const upload = multer({storage:multer.diskStorage({
@@ -37,9 +37,9 @@ router.route('/user/getuser/:id').get(getUser)
 router.route('/user/recharge/:id').post(getRechargedPackage)
 router.route('/user/logout').get(logoutUser)
 // router.route("/user/phoneNo").get(verification,getUserPhone)
-router.route('/user/users').get(verification,getAllUser)
+router.route('/user/users').get(getAllUser)
 router.route('/user/callDuration').post(verification,userCall)
 
-router.route('/user/update/:id').put(verification,updateUser)
+router.route('/user/create/:id').post(verification,createUserProfile)
 router.route('/user/delete/:id').delete(verification,deleteUser)
 module.exports = router;

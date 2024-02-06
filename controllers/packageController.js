@@ -16,19 +16,33 @@ exports.showPackages = catchAsyncError(async(req,res,next)=>{
 
   
   exports.getPackage= catchAsyncError(async (req, res, next) => {
-    const package = await  Packages.findById(req.params.id);
-    if (!package) {
+    const singlePackage = await  Packages.findById(req.params.id);
+    if (!singlePackage) {
       return next(
         new ErrorHandler(`User not found with this id ${req.params.id}`)
       );
     }
     res.status(200).json({
       success: true,
-      package,
+      singlePackage,
     });
   });
   
 exports.createPackages = async (req, res, next) => {
+
+  
+  const { packageName } = req.body;
+  console.log('hi',   packageName);
+
+  const existingProduct = await Packages.findOne({   packageName: { $regex: new RegExp(  packageName, 'i') } });
+
+  if (existingProduct) {
+    // Product already exists
+    return res.status(409).json({
+        success: false,
+        message: 'Package already registered',
+    });
+}
     try {
 
       const packages = await  Packages.create(req.body);
@@ -46,12 +60,28 @@ exports.createPackages = async (req, res, next) => {
 }  
 
 exports.updatePackages = catchAsyncError(async(req,res,next)=>{
-    const newPackage = ({
+  let package = await Packages.findById(req.params.id);
+   
+  const newPackage = ({
       fixedPrice,
       packageName,
       packagePrice,
       packageDetail,
-      isActive} = req.body)
+      isActive} = req.body)    
+      if (newPackage.packageName !== package.packageName) {
+        // Product name has been modified, check for existence
+        const existingPackage = await Packages.findOne({
+          packageName: { $regex: new RegExp(packageName, 'i') },
+        });
+    
+        if (existingPackage) {
+          // Product with the new name already exists
+          return res.status(409).json({
+            success: false,
+            message: 'Package already registered',
+          });
+        }
+      }
      const packages = await Packages.findByIdAndUpdate(req.params.id,newPackage,{
       new:true,
       runValidators: true,

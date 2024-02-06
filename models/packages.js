@@ -22,7 +22,9 @@ fixedPrice:{
     type: Boolean,
     required: [true, "Please Select Option"],
   },
-
+   date:{
+    type:String
+   }
 });
 let Packages = mongoose.model("Packages", packagesSchema);
 module.exports = Packages;

@@ -290,3 +290,4 @@ exports.getAvailableAstrologerByChat = async (req, res, next) => {
     });
   }
 };
+

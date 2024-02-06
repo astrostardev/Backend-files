@@ -175,40 +175,46 @@ user.save()
 
 exports.getRechargedPackage = async (req, res, next) => {
   try {
-    const { fixedPrice } = req.body;
+
+    const { packages  } = req.body;
+ 
     const user = await Client.findById(req.params.id);
 
     if (!user) {
-      return `Package not found with this id ${req.params.id}`;
+      return res.status(404).json({ error: `Package not found with this id ${req.params.id}` });
     }
-    // const fixedPrice = user.packages.fixedPrice
-    const recharge = fixedPrice
-    console.log('fixedPrice',recharge);
-    user.rechargePrice.push({ price: recharge });
-    const calculateTotalAmount = (prices) =>
-    prices.reduce((total, priceObj) => total + Number(priceObj.price || 0), 0).toString();
-    const currentDate = Date.now(); // Assuming currentDate is the current date
-  
-  // Assuming user.rechargePrice is an array of objects with a price property
-  user.balance = calculateTotalAmount(user.rechargePrice);
-  user.rechargePrice.push({ price: fixedPrice, date: currentDate });
-  
-  // If you want to update the user's balance after adding a new price
-  user.balance = calculateTotalAmount(user.rechargePrice);
-  
+    const currentDate = Date.now();
 
-    // Save the updated package
-    const updatedPackage = await user.save();
+
+    user.packages.push(
+      packages
+    );
+     const fixedPrice = packages.fixedPrice
+     const packageName = packages.packageName
+
+     const calculateTotalAmount = (prices) =>
+       prices.reduce((total, priceObj) => total + Number(priceObj.price || 0), 0).toString();
+
+     user.balance = calculateTotalAmount(user.rechargePrice);
+     user.rechargePrice.push({ price: fixedPrice, name:packageName, date: currentDate });
+
+     user.balance = calculateTotalAmount(user.rechargePrice);
+
+  await user.save();
 
     res.status(200).json({
       success: true,
-      updatedPackage,
+    user
     });
-  } catch (error) {
-    // Handle any errors that occur during the process
-    return `Error in updatePackageAndTotalAmount: ${error.message}`;
+  }
+   catch (error) {
+    console.error(error);
+    res.status(500).json({ error: `Error in updatePackageAndTotalAmount: ${error.message}` });
   }
 };
+
+
+
 exports.rechargePackage = async(req,res,next)=>{
    const{packages}=req.body
   const user = await  Client.findById(req.params.id);
@@ -232,7 +238,7 @@ exports.getAllUser = catchAsyncError(async(req,res,next)=>{
   })
 // updateuser -  {{base_url}}/api/v1/user/update/:id
 
-exports.updateUser = catchAsyncError(async (req, res, next) => {
+exports.createUserProfile = catchAsyncError(async (req, res, next) => {
   const user = await Client.findById(req.params.id)
   console.log('user id',req.params.id);
 if(!user){
@@ -240,24 +246,8 @@ if(!user){
 }else{
   console.log('user found',user);
 }
-  console.log('userDetail', req.body);
-  const { name, dob, placeOfbirth, address, city,country,state,email,postalCode,gender } = req.body; // Destructure properties from req.body
-
-  const userProfile = {
-    name,
-    dob,
-    placeOfbirth,
-    address,
-    city,
-    country,
-    state,
-    email,
-    postalCode,
-    gender 
-  };
-
   try {
-    const user = await Client.findByIdAndUpdate(req.params.id, userProfile, {
+    const user = await Client.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
     });

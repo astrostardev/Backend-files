@@ -23,7 +23,7 @@ const verification = async(req, res, next)=>{
 router.route('/package/create').post(createPackages)
 router.route('/package/show').get(showPackages)
 router.route('/package/getPackage/:id').get(getPackage)
-router.route('/package/update/:id').patch(updatePackages)
+router.route('/package/update/:id').put(updatePackages)
 router.route('/package/delete/:id').delete(deletePackages)
 
 

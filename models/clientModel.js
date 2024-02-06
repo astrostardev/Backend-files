@@ -18,6 +18,9 @@ const clientSchema = new mongoose.Schema({
     placeOfbirth:{
       type:String
     },
+    timeOfbirth:{
+      type:String
+    },
     postalCode:{
       type:String
     },
@@ -45,19 +48,20 @@ const clientSchema = new mongoose.Schema({
         type: Date,
         // default: Date.now,
       }, 
-     packages:{
-     fixedPrice:{type:String},
-     packageName:{type:String},
-     packagePrice:[{price:{type:String}}],
-     packageDetail:{type:String},
-     totalAmount:{type:String},
-     _id:{type:String}
-     },
+
+      packages: {
+        type:Array
+      }
+
+      ,
       callDuration:{
         type:String
       },
       rechargePrice: [
         {
+          name:{
+   type:String
+          },
           price: {
             type: String, 
           },
