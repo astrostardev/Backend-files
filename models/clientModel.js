@@ -2,7 +2,13 @@ const mongoose = require ('mongoose');
 const jwt = require('jsonwebtoken');
 
 const clientSchema = new mongoose.Schema({
-    name:{
+  userID:{
+    type:String
+      }, 
+      referralCode:{
+type:String
+      },
+  name:{
        type:String,
     //    required:[true,'Please enter name'] 
     },
@@ -73,6 +79,12 @@ const clientSchema = new mongoose.Schema({
       
     balance:{
       type:Number
+    },
+    welcomerefBonus:{
+      type:String
+    },
+    welcomeBonus:{
+      type:String
     }
 })
 clientSchema.methods.getJwtToken = function () {

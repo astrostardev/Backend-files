@@ -22,16 +22,25 @@ exports.registerUser = async (req, res, next) => {
         message: 'User already registered please Login',
       });
     }
+    if(req.body.referralCode ){
+      const compareRefCodeWithUserId = await Client.findOne({ userID: req.body.referralCode });
+      if (!compareRefCodeWithUserId) {
+        return res.status(403).json({
+          success: false,
+          message: 'This Referral Code does not match with any user',
+        });
+      }
+    }
+   
 
+     const user= await Client.create(req.body);
+     console.log(req.body);
+     const date = new Date().toString()
+     user.registerTime = date
+     user.save()
+ 
+     sendUserToken(user, 201, res);
 
-    // If Clientdoesn't exist, create a new user
-    const user= await Client.create(req.body);
-    console.log(req.body);
-    const date = new Date().toString()
-    user.registerTime = date
-    user.save()
-
-    sendUserToken(user, 201, res);
   } catch (error) {
     console.error("Error during user registration:", error);
     res.status(500).json({
@@ -282,3 +291,42 @@ if(!user){
         success: true,
     })
   })
+
+  // Searching user by Referral code
+
+  exports.searchUserByRefCode = catchAsyncError(async (req, res, next) => {
+    const users = await Client.find({referralCode: req.body.referralCode });
+      if (!users) {
+        return res.status(403).json({
+          success: false,
+          message: 'This Referral Code does not match with any user',
+        });
+      }  
+    if(!users) {
+        return next(new ErrorHandler(`User not found with this referral code ${req.query.referralCode}`))
+    }
+    res.status(200).json({
+      success: true,
+      users
+    })
+  })
+  exports.sortUserByBonus = catchAsyncError(async (req, res, next) => {
+    // Find users with welcomeBonus having a value
+    const users = await Client.find({
+      welcomeBonus: { $exists: true, $ne: null }
+    });
+    const refusers = await Client.find({
+      welcomerefBonus: { $exists: true, $ne: null }
+    });
+    res.status(200).json({
+      success: true,
+      users,
+      refusers
+    });
+  });
+  
+  
+  
+  
+
+
