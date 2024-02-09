@@ -324,7 +324,42 @@ if(!user){
       refusers
     });
   });
-  
+  exports.referralBonusForUser = catchAsyncError(async (req, res, next) => {
+    try {
+        // Count users with the referral code 
+        const refusers = await Client.find({
+          welcomerefBonus: { $exists: true, $ne: null }
+      });
+      console.log(refusers);
+      const displayRefUser = refusers.map((data)=>{
+          return  data.referralCode
+      })
+      console.log( displayRefUser );
+      const user = await Client.find({ userID:displayRefUser });
+
+      
+        const count = await Client.countDocuments({ referralCode:displayRefUser });
+
+        res.status(200).json({
+            success: true,
+            referralCount: count,
+            user
+        });
+    } catch (error) {
+        // Handle errors
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal Server Error'
+        });
+    }
+});
+
+
+
+
+
+
   
   
   
