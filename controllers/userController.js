@@ -1,4 +1,5 @@
-const catchAsyncError = require('../middlewares/catchAsyncError')
+const catchAsyncError = require('../middlewares/catchAsyncError');
+const Bonus = require('../models/BonusModel');
 const Client = require('../models/clientModel')
 const APIFeatures = require("../utils/apiFeatures")
 // const requestIp = require('request-ip')
@@ -11,7 +12,6 @@ exports.registerUser = async (req, res, next) => {
     if (process.env.NODE_ENV === 'production') {
       BASE_URL = `${req.protocol}://${req.get('host')}`;
     }
-
     // Check if the Clientalready exists
     const existingUser = await  Client.findOne({ phoneNo: req.body.phoneNo });
 
@@ -22,19 +22,76 @@ exports.registerUser = async (req, res, next) => {
         message: 'User already registered please Login',
       });
     }
-    if(req.body.referralCode ){
-      const compareRefCodeWithUserId = await Client.findOne({ userID: req.body.referralCode });
-      if (!compareRefCodeWithUserId) {
-        return res.status(403).json({
-          success: false,
-          message: 'This Referral Code does not match with any user',
-        });
-      }
-    }
-   
-
      const user= await Client.create(req.body);
-     console.log(req.body);
+     const bonus = await Bonus.find();
+     const amount = bonus.map(data => data.welcomeBonus);
+     //without referral code 
+     if (!req.body.referralCode) {
+         
+         // Directly access the first (and only) element of the amount array
+         const welcomeBonusAmount = amount.length > 0 ? amount[0] : '0';
+         user.welcomeBonus = welcomeBonusAmount
+         // Update rechargePrice and save user
+         const calculateTotalAmount = prices =>
+             prices.reduce((total, priceObj) => total + Number(priceObj.price || 0), 0).toString();
+     
+         user.balance = calculateTotalAmount(user.rechargePrice);
+         user.rechargePrice.push({ price: welcomeBonusAmount });
+     
+         user.balance = calculateTotalAmount(user.rechargePrice);
+         await user.save();
+     }
+   //referral Code user getting bonus
+   const refamount = bonus.map(data => data.refBonus);
+   console.log('refamount',refamount);
+   if (req.body.referralCode) {
+       
+       const referralBonusAmount = refamount .length > 0 ? refamount [0] : '0';
+       user.welcomeRefBonus = referralBonusAmount 
+       // Update rechargePrice and save user
+       const calculateTotalAmount = prices =>
+           prices.reduce((total, priceObj) => total + Number(priceObj.price || 0), 0).toString();
+   
+       user.balance = calculateTotalAmount(user.rechargePrice);
+       user.rechargePrice.push({ price: referralBonusAmount });
+   
+       user.balance = calculateTotalAmount(user.rechargePrice);
+       await user.save();
+   } 
+
+ //bonus for refered user 
+ const referedAmount = bonus.map(data => data.referralAmount);
+ const refuser = await Client.findOne({ userID: req.body.referralCode }); 
+if (refuser) {
+    const referedBonusAmount = referedAmount.length > 0 ? parseFloat(referedAmount[0]) : 0; // Parse to float
+    const calculateTotalAmount = (prices) =>
+        prices.reduce((total, priceObj) => total + parseFloat(priceObj.price || 0), 0).toString();
+    
+    refuser.rechargePrice.push({ price: referedBonusAmount });
+    refuser.balance = calculateTotalAmount(refuser.rechargePrice);
+    if(refuser.welcomeBonus){
+      refuser.referedAmount = parseFloat(refuser.balance || 0) - parseFloat(refuser.welcomeBonus || 0); // Parse to float
+    }
+    if(refuser.welcomeRefBonus){
+      refuser.referedAmount = parseFloat(refuser.balance || 0) - parseFloat(refuser.welcomeRefBonus || 0); // Parse to float
+    }
+
+    // Increase refuser.referedUsersCount by the number of times the referral code is used
+    const numberOfTimesUsed = 1; // You need to determine this number based on your application logic
+    if (!isNaN(refuser.referedUsersCount)) {
+        refuser.referedUsersCount = parseFloat(refuser.referedUsersCount || 0) + numberOfTimesUsed;
+    } else {
+        // If refuser.referedUsersCount is not a number, initialize it to numberOfTimesUsed
+        refuser.referedUsersCount = numberOfTimesUsed;
+    }
+
+    await refuser.save();
+}
+
+
+
+
+
      const date = new Date().toString()
      user.registerTime = date
      user.save()
@@ -316,7 +373,7 @@ if(!user){
       welcomeBonus: { $exists: true, $ne: null }
     });
     const refusers = await Client.find({
-      welcomerefBonus: { $exists: true, $ne: null }
+      referralCode: { $exists: true, $ne: null }
     });
     res.status(200).json({
       success: true,
@@ -326,27 +383,24 @@ if(!user){
   });
   exports.referralBonusForUser = catchAsyncError(async (req, res, next) => {
     try {
-        // Count users with the referral code 
         const refusers = await Client.find({
-          welcomerefBonus: { $exists: true, $ne: null }
+          referralCode: { $exists: true, $ne: null }
       });
-      console.log(refusers);
-      const displayRefUser = refusers.map((data)=>{
-          return  data.referralCode
-      })
-      console.log( displayRefUser );
-      const user = await Client.find({ userID:displayRefUser });
-
+      const displayRefUser = refusers.map(data=>data.referralCode)
+      console.log(displayRefUser);
       
-        const count = await Client.countDocuments({ referralCode:displayRefUser });
+      const users = await Client.find({ userID: { $in: displayRefUser } });
+      // const userID = await Client.find({ referralCode: { $in: users.map(data=>data.userID) } });
+      // const usersCount = await Client.find({ referralCode: displayRefUser})
+      // const count = usersCount.length
 
         res.status(200).json({
             success: true,
-            referralCount: count,
-            user
+            // count,
+            // userID,
+            users
         });
     } catch (error) {
-        // Handle errors
         console.error(error);
         res.status(500).json({
             success: false,

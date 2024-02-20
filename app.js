@@ -32,10 +32,9 @@ const language = require('./routes/language.js')
 const product = require('./routes/Product.js')
 const course = require('./routes/Course.js')
 const category = require('./routes/Category.js')
+const chat = require('./routes/Chat.js')
+const bonus = require('./routes/bonus.js')
 const courseCategory = require('./routes/courseCategory.js')
-
-
-
 
 
 app.use('/api/v1',user)
@@ -47,7 +46,11 @@ app.use('/api/v1',language);
 app.use('/api/v1',product);
 app.use('/api/v1',category);
 app.use('/api/v1',course);
-app.use('/api/v1/',courseCategory)
+app.use('/api/v1',courseCategory)
+app.use('/api/v1',chat)
+app.use('/api/v1',bonus)
+
+
 
 
 

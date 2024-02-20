@@ -80,12 +80,21 @@ type:String
     balance:{
       type:Number
     },
-    welcomerefBonus:{
-      type:String
+   referralCode:{
+      type:String,
+      default: null, 
+      allowNull: true
     },
     welcomeBonus:{
       type:String
+    },
+    welcomeRefBonus:{type:String},
+    referedAmount:{type:String},
+    referedUsersCount:{
+      type:String
     }
+},{
+  timeStamp:true,
 })
 clientSchema.methods.getJwtToken = function () {
   const secret = process.env.JWT_SECRET;
