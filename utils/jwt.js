@@ -3,11 +3,16 @@ const sendToken = (admin, statusCode, res) => {
     const token = admin.getJwtToken();
 
     // Setting cookies
+    const expiresInDays = parseInt(process.env.COOKIE_EXPIRES_TIME, 10);
+    if (isNaN(expiresInDays)) {
+        throw new Error('Invalid COOKIE_EXPIRES_TIME');
+    }
+    
     const options = {
-        expires: new Date(
-            Date.now() + process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60 * 1000
-        ),
+        expires: new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000),
         httpOnly: true,
+        sameSite: 'strict',
+        secure: process.env.NODE_ENV !== 'development'
     };
 
     res.status(statusCode)

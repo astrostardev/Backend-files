@@ -21,14 +21,9 @@ adminSchema.methods.getJwtToken = function () {
     const secret = process.env.JWT_SECRET;
     const payload = {
         adminId: this._id,
-        email: this.email,
-        // Other payload data if needed
+        email: this.email,     
     };
-    const options = {
-        expiresIn: process.env.JWT_EXPIRES_IN,
-    };
-
-    return jwt.sign(payload, secret, options);
+    return jwt.sign(payload, secret);
 };
 adminSchema.methods.isValidPassword = async function(enteredPassword){
     return bcrypt.compare(enteredPassword, this.password)

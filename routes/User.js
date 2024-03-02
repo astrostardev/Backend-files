@@ -2,7 +2,9 @@ const express = require('express');
 const multer = require('multer')
 const jwt = require('jsonwebtoken')
 
-const {registerUser, getAllUser, updateUser, deleteUser, loginUser, getUserPhone, getUser, userCall, logoutUser, rechargePackage, getRechargedPackage, createUserProfile, searchUserByRefCode, sortUserByBonus, referralBonusForUser} = require('../controllers/userController')
+const {registerUser, getAllUser, updateUser, deleteUser, loginUser, getUserPhone, getUser, userCall, logoutUser, rechargePackage, getRechargedPackage, createUserProfile, searchUserByRefCode, sortUserByBonus, referralBonusForUser, getUserId} = require('../controllers/userController');
+const {verification} = require('../middlewares/authenticate.js');
+const Client = require('../models/clientModel');
 const router = express.Router();
 
 const upload = multer({storage:multer.diskStorage({
@@ -14,26 +16,12 @@ const upload = multer({storage:multer.diskStorage({
     }
 })})
 
-const verification = async(req, res, next)=>{
-    try{
-      let token = req.header("Authorization")
-      if(token && token.startsWith("Bearer ")){
-        token = token.slice(7,token.length).trimLeft();
-        const verified = jwt.verify(token,process.env.JWT_SECRET)
-        req.user = verified
-        console.log(verified);
-        next()
-      }
-      else{
-        res.status(403).send("Access denied")
-      }
-    }catch(err){
-       res.status(400).json({msg:err.message})
-    }
-  }
+// 
 router.route('/user/register').post(registerUser)
 router.route('/user/login').post(loginUser)
 router.route('/user/getuser/:id').get(getUser)
+router.route('/user/getuser').post(getUserId)
+
 router.route('/user/by_ref_code').get(searchUserByRefCode)
 router.route('/user/bonus').get(sortUserByBonus)
 router.route('/user/referral_bonus').get(referralBonusForUser)

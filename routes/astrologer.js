@@ -1,6 +1,5 @@
 const express = require("express");
-const jwt = require('jsonwebtoken')
-const app = express()
+
 const {
   registerAstrologer,
   getAllAstrologers,
@@ -15,32 +14,16 @@ const {
   availableAstrologer,
   getAvailableAstrologerByCall,
   getAvailableAstrologerByChat,
-  searchAstrologerByName
+  searchAstrologerByName,
+  getAstrologerForSidebar
 } = require("../controllers/astrologerController");
 
 const multer = require("multer");
 const router = express.Router();
 const path = require("path");
+const { verification,astrologerVerification } = require("../middlewares/authenticate");
 
-// app.use('/uploads', express.static('uploads'));
 
-const verification = async(req, res, next)=>{
-  try{
-    let token = req.header("Authorization")
-    if(token && token.startsWith("Bearer ")){
-      token = token.slice(7,token.length).trimLeft();
-      const verified = jwt.verify(token,process.env.JWT_SECRET)
-      req.user = verified
-      console.log(verified);
-      next()
-    }
-    else{
-      res.status(403).send("Access denied")
-    }
-  }catch(err){
-     res.status(400).json({msg:err.message})
-  }
-}
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     // You can choose the destination based on the file type or other conditions
@@ -71,16 +54,18 @@ registerAstrologer
 );
 
 
-router.route("/astrologer/allAstrologers").get(getAllAstrologers);
+router.route("/astrologer/allAstrologers").get( getAllAstrologers);
 router.route("/astrologer/getAstrologer/:id").get(getAstrologer);
-router.route("/astrologer/delete/:id").delete(verification,deleteAstrologer);
+router.route("/astrologer/delete/:id").delete(deleteAstrologer);
 router.route("/astrologer/update/:id").put(
   upload.fields([{ name: "certificatePic" }, { name: "profilePic" },{ name: "aadharPic" },{ name: "panPic" }]),
 
 updateAstrologer);
 // router.route("/astrologer/state/:id").put(activeAstrologer);
 router.route("/astrologer/phoneNo").get(getAstrologerPhone)
-router.route("/astrologer/available/:id").post(availableAstrologer)
+router.route("/astrologers").get(astrologerVerification,getAstrologerForSidebar)
+
+router.route("/astrologer/available/:id").post(astrologerVerification, availableAstrologer)
 router.route("/astrologer/call_available").get(getAvailableAstrologerByCall)
 router.route("/astrologer/chat_available").get(getAvailableAstrologerByChat)
 router.route("/astrologer/category").get(getAstrologerByCategory)

@@ -87,16 +87,11 @@ if (refuser) {
 
     await refuser.save();
 }
-
-
-
-
-
      const date = new Date().toString()
      user.registerTime = date
      user.save()
- 
-     sendUserToken(user, 201, res);
+//  const token = req.body
+     sendUserToken(user,201, res);
 
   } catch (error) {
     console.error("Error during user registration:", error);
@@ -154,7 +149,7 @@ exports.loginUser = async (req, res, next) => {
       return;
     }
 
-    console.log(user);
+    // console.log(user);
     const date = new Date().toString()
     user.loginTime = date
     user.save()
@@ -300,6 +295,7 @@ exports.getAllUser = catchAsyncError(async(req,res,next)=>{
     res.status(200).json({
       success:true,
       users
+
      }) 
   })
 // updateuser -  {{base_url}}/api/v1/user/update/:id
@@ -410,6 +406,21 @@ if(!user){
 });
 
 
+exports.getUserId = catchAsyncError(async (req, res, next) => {
+  console.log('req.body',req.body);
+  const {id:userId} = req.body
+  console.log('id',userId);
+  const user = await  Client.findById(userId);
+  if(!user) {
+    console.log('user not find');
+
+  }
+  
+  res.status(200).json({
+      success: true,
+      user
+  })
+})
 
 
 

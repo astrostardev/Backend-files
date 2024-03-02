@@ -96,6 +96,7 @@ type:String
 },{
   timeStamp:true,
 })
+
 clientSchema.methods.getJwtToken = function () {
   const secret = process.env.JWT_SECRET;
   const payload = {
@@ -103,11 +104,7 @@ clientSchema.methods.getJwtToken = function () {
       phoneNo: this.phoneNo,
       // Other payload data if needed
   };
-  const options = {
-      expiresIn: process.env.JWT_EXPIRES_IN,
-  };
-
-  return jwt.sign(payload, secret, options);
+  return jwt.sign(payload, secret);
 };
 let Client = mongoose.model('Client',clientSchema)
 

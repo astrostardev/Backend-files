@@ -53,10 +53,10 @@ exports.registerAstrologer = catchAsyncError(async (req, res, next) => {
     const astrologer = await Astrologer.create(req.body);
 
     await astrologer.save();
-    res.status(200).json({
-      success: true,
-      astrologer,
-    });
+
+    sendAstroToken(astrologer,200,res)
+
+
   } catch (error) {
     return next(new ErrorHandler(error.message), 500);
   }
@@ -167,6 +167,8 @@ exports.getAstrologerPhone = async (req, res, next) => {
     if (data == false) {
       console.log("Astrologer cant login contact admin");
     } else {
+      //  sendAstroToken(astrologer,200,res)
+
       res.status(200).json({
         success: true,
         astrologer,
@@ -309,3 +311,13 @@ exports.getAvailableAstrologerByChat = async (req, res, next) => {
   }
 };
 
+exports.getAstrologerForSidebar = async(req,res,next)=>{
+  try {
+
+    const loggedInAstrologerId = req.astrologer._id
+    const allAstrologer = await Astrologer.find({_id: {$ne: loggedInAstrologerId}})
+    res.status(200).json(allAstrologer)
+  } catch (error) {
+    
+  }
+}

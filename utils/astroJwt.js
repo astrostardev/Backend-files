@@ -1,25 +1,28 @@
-
 const sendAstroToken = (astrologer, statusCode, res) => {
   // Creating JWT Token
-    console.log('detail',astrologer);
+  const token = astrologer.getJwtToken();
 
-    const token = astrologer.getJwtToken();
-    console.log('token',token);
-    const options = {
-      expires: new Date(
-        Date.now() + process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60 * 1000
-      ),
-      httpOnly: true,
-    };
-  
-    res.status(statusCode).cookie("token", token, options).json({
-      success: true,
-      token,
-      astrologer
-    });
- 
   // Setting cookies
+  const expiresInDays = parseInt(process.env.COOKIE_EXPIRES_TIME, 10);
+  if (isNaN(expiresInDays)) {
+      throw new Error('Invalid COOKIE_EXPIRES_TIME');
+  }
   
+  const options = {
+      expires: new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000),
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: process.env.NODE_ENV !== 'development'
+  };
+  
+
+  res.status(statusCode)
+      .cookie('token', token, options)
+      .json({
+          success: true,
+          token,
+          astrologer
+      });
 };
 
 module.exports = sendAstroToken;

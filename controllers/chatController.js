@@ -2,6 +2,8 @@ const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncError = require("../middlewares/catchAsyncError");
 const Chat = require('../models/chatModel');
 const Client = require("../models/clientModel");
+const Astrologer = require("../models/astrologerModel");
+
 exports.accessChat = catchAsyncError(async (req, res, next) => {
     const {userId} = req.body
     if(!userId){
@@ -38,24 +40,25 @@ if(isChat.length > 0){
 }
 
   
-  });
+});
 
-  exports.fetchChats =  catchAsyncError(async (req, res, next) =>{
-    try{
-        Chat.find({users:{$elemMatch:{$eq:req.user._id}}}
-            ).popuate("users","-password")
-            .popuate("latestMessage")
-            .sort({updatedAt:-1})
-            .then(async(res)=>{
-                res = await Client.populate(res,{
-                    path:"latestMessage.sender",
-                    select:"name email"
-                });
-                res.status(200).send(res)
-            })
-
-    } catch(error){
-        res.status(400)
-        throw new ErrorHandler(error.message)
+exports.fetchChats = catchAsyncError(async (req, res, next) => {
+    try {
+        console.log('rq',req.params.id);
+        const result = await Chat.find({ participants: { $elemMatch: { $eq: req.params.id } } })
+        .sort({ updatedAt: -1 })
+        .populate({
+            path: "participants",
+            select: "name",
+        })
+       
+    res.status(200).json({
+        message: "success",
+        chats: result
+    });
+    
+        
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
-  })
+});

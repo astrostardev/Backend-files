@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require('validator');
+const jwt = require('jsonwebtoken')
 
 const astrologerSchema = new mongoose.Schema({
   astrologerID:{
@@ -33,7 +34,7 @@ type:String
   },
   mobileSecondary: {
     type: String,
-    unique: true,
+    // unique: true,
   },
 
   address: {
@@ -94,7 +95,7 @@ type:String
     {
       file: {
         type: String,
-        required: [true, " Please upload Certificate"],
+        // required: [true, " Please upload Certificate"],
 
       }
     }
@@ -103,7 +104,7 @@ type:String
     {
       pic: {
         type: String,
-        required: [true, " Please upload Profile Image"],
+        // required: [true, " Please upload Profile Image"],
 
       }
     }
@@ -112,7 +113,7 @@ type:String
     {
       pic: {
         type: String,
-        required: [true, " Please upload aadhar Image"],
+        // required: [true, " Please upload aadhar Image"],
 
       }
     }
@@ -121,7 +122,7 @@ type:String
     {
       pic: {
         type: String,
-        required: [true, " Please upload PanCard Image"],
+        // required: [true, " Please upload PanCard Image"],
 
       }
     }
@@ -156,10 +157,22 @@ chatAvailable:{
 },
 emergencyCallAvailable:{
   type:Boolean
+},
+latestMessage:{
+  type:String,
 }
 });
 
 
+astrologerSchema.methods.getJwtToken = function () {
+  const secret = process.env.JWT_SECRET;
+  const payload = {
+      astrologerId: this._id,
+      phoneNo: this.mobilePrimary,
+      // Other payload data if needed
+  };
+  return jwt.sign(payload, secret);
+};
 let Astrologer = mongoose.model("Astrologer", astrologerSchema);
 
 module.exports = Astrologer;
