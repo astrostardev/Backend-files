@@ -111,7 +111,7 @@ exports.getUserMessages = async (req, res) => {
     try {
         const { id: paramsId } = req.params;
         const userId = req.user?._id;
-        console.log('userId',userId);
+        // console.log('userId',userId);
 
         const conversation = await Chat.findOne({
             participants: { $all: [userId, paramsId] }
@@ -131,7 +131,7 @@ exports.getastrologerMessages = async (req, res) => {
     try {
         const { id: paramsId } = req.params;
         const astroId = req.astrologer?._id;
-         console.log('userId',astroId);
+        //  console.log('userId',astroId);
         const conversation = await Chat.findOne({
             participants: { $all: [astroId, paramsId] }
         }).populate("messages");
@@ -151,7 +151,7 @@ exports.getAstrolatestMessages = async (req, res) => {
     try {
         const { id: paramsId } = req.params;
         const astroId = req.astrologer?._id;
-         console.log('userId',astroId);
+        //  console.log('userId',astroId);
         const conversation = await Chat.findOne({
             participants: { $all: [astroId, paramsId] }
         }).populate("messages");
@@ -171,7 +171,7 @@ exports.getUserlatestMessages = async (req, res) => {
     try {
         const { id: paramsId } = req.params;
         const userId = req.user?._id;
-        console.log('userId',userId);
+        // console.log('userId',userId);
 
         const conversation = await Chat.findOne({
             participants: { $all: [userId, paramsId] }

@@ -1,66 +1,131 @@
-const { Server } = require('socket.io');
-const http = require('http')
-const express = require('express')
-const path = require("path")
+const http = require("http");
 const app = require("../app");
-const Chat = require('../models/chatModel');
+const WebSocket = require("ws");
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+const Chat = require("../models/chatModel");
+const Message = require("../models/messageModel");
 
-const server = http.createServer(app)
+const connectedClients = []; // Initialize array to store connected clients
 
-const io = new Server (server,{
-    cors:{
-        origin:"*",
-    },
-    pingTimeout:60000,
+const broadcastMessage = (message) => {
+  connectedClients.forEach(client => {
+    client.send(JSON.stringify(message));
+    console.log('brodcast message',message);
+  });
+};
+wss.on("connection", (ws) => {
+  console.log("Client connected");
+
+  connectedClients.push(ws);
+
+  ws.on("message", async (message) => {
+    const data = JSON.parse(message);
+
+    switch (data.type) {
+        case "setup_astro":
+        ws.astrologerId = data.astrologerId;
+        console.log("Setup astrologer:", data.astrologerId);
+        ws.send(JSON.stringify({ type: "connected" }));
+        break;
+        case "setup":
+        ws.userId = data.userId;
+        console.log("Setup user:", data.userId);
+        ws.send(JSON.stringify({ type: "connected" }));
+        break;
+        case "get messages":
+        try {
+          const roomId = data.room;
+console.log(roomId);
+
+          const userId = data.userId;
+
+
+          let conversation = await Chat.findOne({
+            participants: { $all: [userId, roomId] },
+          }).populate("messages");
+          console.log(conversation?.messages);
+
+          ws.send(
+            JSON.stringify({
+              type: "messages",
+              messages: conversation?.messages,
+            })
+          );
+        } catch (error) {
+          console.error("Error in getMessages:", error);
+          ws.send(
+            JSON.stringify({ type: "error", message: "Internal server error" })
+          );
+        }
+        break;
+
+        case "new message":
+        ws.room = data.room;
+        const chat = data.message;
+        const roomId = data.room;
+        const userId = data.userId;
+      
+        // Save the new message to the database asynchronously
+        try {
+          let conversation = await Chat.findOne({
+            participants: { $all: [userId, roomId] },
+          });
+          if (!conversation) {
+            conversation = await Chat.create({
+              participants: [userId, roomId],
+            });
+          }
+          let newMessage = new Message({
+            senderId: userId,
+            receiverId: roomId,
+            message: chat,
+          });
+      
+          if (newMessage) {
+            conversation.messages.push(newMessage._id);
+          }
+          console.log('new message', newMessage);
+          await Promise.all([conversation.save(), newMessage.save()]);
+      
+          // Broadcast the new message to all connected clients
+          broadcastMessage({
+            type: "new message",
+            message: chat,
+            receiverId: roomId,
+            senderId: userId,
+            createdAt: Date.now()
+          });
+        } catch (error) {
+          console.error("Error saving message:", error);
+          // Handle error appropriately
+        }
+      
+        // Send a "get messages" request to retrieve updated messages
+        connectedClients.forEach(client => {
+          client.send(JSON.stringify({
+            type: "get messages",
+            room: roomId,
+            userId: userId
+          }));
+        });
+        break;
+      
+         default:
+        console.log("Unknown message type:", data.type);
+    }
+  });
+
+  ws.on("close", () => {
+    console.log("Client disconnected");
+
+    // Remove the disconnected WebSocket from connectedClients array
+    const index = connectedClients.indexOf(ws);
+    if (index !== -1) {
+      connectedClients.splice(index, 1);
+    }
+  });
 });
 
 
-io.on('connection', (socket)=>{
-//    console.log("a user connected", socket.id);
-    
-socket.on("setup astro",(astrologer)=>{
-     console.log('astrologer',astrologer);
-    socket.join(astrologer[0]._id);
-      console.log("astrologer[0]._id", astrologer[0]._id);
-     socket.emit("connected")
-   });
-   socket.on("setup",(user)=>{
-    
-    // console.log('user',user);
-    socket.join(user._id);
-    //  console.log("user.data._id", user._id);
-     socket.emit("connected")
-
-   });
-   //get existing chats
-   socket.on("join chat",(room)=>{
-    socket.join(room)  // room parameter has the Id of user chat with whom 
-     console.log("user joined room",room);
-   });
-
-   socket.on("new message",(newMessageStatus)=>{
-    var chat = newMessageStatus;
-    console.log('chat id',chat.newMessage._id , 'messsage', chat.newMessage.message);
-    socket.in(chat.newMessage._id).emit("message received", chat.newMessage.message)
-
-    //  if(!chat.users){
-    //     return console.log("chat.user not definied");
-    //  }
-    //  chat.users.forEach((user)=>{
-    //     if(user._id == newMessageStatus.sender._id) return;
-    //  })
-   })
-
-    // const userId = socket.handshake.query.userId
-    // console.log('soketUserId:',userId);
-    // if(userId != "undefined") userSocketMap[userId] = socket.id;
-    // //io.emit()is used to send events to alll the connected clients
-    // io.emit("getOnlineUsers",Object.keys(userSocketMap));
-    // socket.on("disconnect",()=>{
-    //     console.log("user disconncted", socket.id);
-    //     delete userSocketMap[userId];
-    // io.emit("getOnlineUsers",Object.keys(userSocketMap));
-
-    // })
-})
-module.exports = { app, io, server};
+module.exports = { app, server };

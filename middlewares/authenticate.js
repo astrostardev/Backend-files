@@ -19,6 +19,7 @@ exports.verification =(Client,idField)=>async(req,res, next)=>{
             return res.status(404).json({error:"User not found"})
         }
         req.user = user
+       
         next()
       }
       else{

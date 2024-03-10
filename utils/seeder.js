@@ -10,18 +10,20 @@ const Methods = require("../models/methodologyModel.js");
 const Bonus = require("../models/BonusModel.js");
 
 const dotenv = require("dotenv");
+require('dotenv').config();
+
 const path = require("path");
 const connectDatabase = require("../config/database.js");
 const Message = require("../models/messageModel.js");
 const { Channel } = require("diagnostics_channel");
-const Chat = require("../models/chatModel.js");
+ const Chat = require("../models/chatModel.js");
 
-dotenv.config({ path: path.join(__dirname, "../config/config.env") });
+// dotenv.config({ path: path.join(__dirname, "../") });
 connectDatabase();
 
 const seedProducts = async () => {
   try {
-    await Client.deleteMany();
+    await Message.deleteMany();
     console.log("All user deleted");
   } catch (error) {
     console.log(error.message);

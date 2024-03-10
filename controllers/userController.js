@@ -159,7 +159,7 @@ exports.loginUser = async (req, res, next) => {
     // console.log(ipAddress);
 
     const clientIp = req.clientIp;
-    console.log(clientIp);
+    // console.log(clientIp);
 
     // Additional checks, e.g., password verification, can be added here
 
@@ -407,9 +407,9 @@ if(!user){
 
 
 exports.getUserId = catchAsyncError(async (req, res, next) => {
-  console.log('req.body',req.body);
+  // console.log('req.body',req.body);
   const {id:userId} = req.body
-  console.log('id',userId);
+  // console.log('id',userId);
   const user = await  Client.findById(userId);
   if(!user) {
     console.log('user not find');
