@@ -17,6 +17,7 @@ const broadcastMessage = (message) => {
 wss.on("connection", (ws) => {
   console.log("Client connected");
 
+  
   connectedClients.push(ws);
 
   ws.on("message", async (message) => {

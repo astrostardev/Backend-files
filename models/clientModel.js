@@ -92,7 +92,23 @@ type:String
     referedAmount:{type:String},
     referedUsersCount:{
       type:String
+    },
+    chatDetails:[{
+      astrologer:{
+        type:String
+      },
+      date:{
+        type:String
+      },
+      chatTime:{
+        type:String
+      },
+      spentAmount:{
+         type:String
+      }
     }
+   
+    ],
 },{
   timeStamp:true,
 })

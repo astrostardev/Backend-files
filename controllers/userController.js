@@ -8,6 +8,7 @@ const  sendUserToken = require('../utils/userJwt')
 exports.registerUser = async (req, res, next) => {
   try {
     let BASE_URL = process.env.BACKEND_URL;
+    const date = new Date().toString()
 
     if (process.env.NODE_ENV === 'production') {
       BASE_URL = `${req.protocol}://${req.get('host')}`;
@@ -36,7 +37,7 @@ exports.registerUser = async (req, res, next) => {
              prices.reduce((total, priceObj) => total + Number(priceObj.price || 0), 0).toString();
      
          user.balance = calculateTotalAmount(user.rechargePrice);
-         user.rechargePrice.push({ price: welcomeBonusAmount });
+         user.rechargePrice.push({ price: welcomeBonusAmount,date: date });
      
          user.balance = calculateTotalAmount(user.rechargePrice);
          await user.save();
@@ -87,7 +88,6 @@ if (refuser) {
 
     await refuser.save();
 }
-     const date = new Date().toString()
      user.registerTime = date
      user.save()
 //  const token = req.body
@@ -422,11 +422,41 @@ exports.getUserId = catchAsyncError(async (req, res, next) => {
   })
 })
 
+exports.getBalanceAfterChat = catchAsyncError(async (req, res, next) => {
+  // console.log('req.body',req.body);
+  const {astrologer, date, chatTime, spentAmount,id } = req.body
+  const user = await  Client.findById(id);
+  user.chatDetails.push({
+    astrologer: astrologer,
+    date: date,
+    chatTime: chatTime,
+    spentAmount: spentAmount,
+  });
+  await user.save();
+if(user.balance >= spentAmount){
+  const BalanceAfterChat = user.balance - spentAmount;
+ user.balance = BalanceAfterChat
+
+ user.save()
+
+
+}
 
 
 
+  if(!user) {
+    console.log('user not find');
+
+  }
   
-  
+  res.status(200).json({
+      success: true,
+      user
+  })
+})
+
+
+
   
 
 
