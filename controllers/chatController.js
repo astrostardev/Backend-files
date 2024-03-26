@@ -54,7 +54,7 @@ exports.fetchChats = catchAsyncError(async (req, res, next) => {
        
     res.status(200).json({
         message: "success",
-        chats: [result]
+        chats: result
     });
     
         

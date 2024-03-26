@@ -160,6 +160,10 @@ emergencyCallAvailable:{
 },
 latestMessage:{
   type:String,
+},
+isBusy:{
+  type:Boolean,
+  
 }
 });
 

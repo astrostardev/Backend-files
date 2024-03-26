@@ -321,3 +321,15 @@ exports.getAstrologerForSidebar = async(req,res,next)=>{
     
   }
 }
+exports.isBusyAstrologer = async (req,res,next)=>{
+  try {
+
+    const {isBusy,id} = req.body
+    const allAstrologer = await Astrologer.findById(id)
+    allAstrologer.isBusy = isBusy
+    allAstrologer.save()
+    res.status(200).json(allAstrologer)
+  } catch (error) {
+    
+  }
+}

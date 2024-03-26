@@ -15,7 +15,8 @@ const {
   getAvailableAstrologerByCall,
   getAvailableAstrologerByChat,
   searchAstrologerByName,
-  getAstrologerForSidebar
+  getAstrologerForSidebar,
+  isBusyAstrologer
 } = require("../controllers/astrologerController");
 
 const multer = require("multer");
@@ -66,6 +67,8 @@ router.route("/astrologer/phoneNo").get(getAstrologerPhone)
 router.route("/astrologers").get(astrologerVerification,getAstrologerForSidebar)
 
 router.route("/astrologer/available/:id").post(astrologerVerification, availableAstrologer)
+router.route("/astrologer/isBusy").post(isBusyAstrologer)
+
 router.route("/astrologer/call_available").get(getAvailableAstrologerByCall)
 router.route("/astrologer/chat_available").get(getAvailableAstrologerByChat)
 router.route("/astrologer/category").get(getAstrologerByCategory)
