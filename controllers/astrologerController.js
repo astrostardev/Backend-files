@@ -278,11 +278,11 @@ exports.availableAstrologer = catchAsyncError(async (req, res, next) => {
 exports.getAvailableAstrologerByCall = async (req, res, next) => {
   try {
     // const callAvailable = req.query.callAvailable === 'true'; // Check for the string 'true'
-    const astrologers = await Astrologer.find({ callAvailable: true });
+    const  callAvailable  = await Astrologer.find({ callAvailable: true });
     
     res.status(200).json({
       success: true,
-      astrologers,
+      callAvailable 
     });
   } catch (error) {
     console.error("Error:", error);
@@ -296,11 +296,11 @@ exports.getAvailableAstrologerByCall = async (req, res, next) => {
 exports.getAvailableAstrologerByChat = async (req, res, next) => {
   try {
     // const chatAvailable = req.query.chatAvailable == 'true';
-    const astrologers = await Astrologer.find({ chatAvailable: true });
+    const chatAvailable = await Astrologer.find({ chatAvailable: true });
     console.log("cate", req.query);
     res.status(200).json({
       success: true,
-      astrologers,
+      chatAvailable ,
     });
   } catch (error) {
     console.error("Error:", error);
