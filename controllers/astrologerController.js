@@ -333,3 +333,82 @@ exports.isBusyAstrologer = async (req,res,next)=>{
     
   }
 }
+
+exports.getChatDetailWithUser = catchAsyncError(async (req, res, next) => {
+  const { name, userId, date, chatTime, earnedAmount, id } = req.body;
+
+  const astrologer = await Astrologer.findById(id);
+
+  if (!astrologer) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+
+  // Find the astrologer chat details in the sameAstrologer array
+  const sameUserIndex = astrologer.chatDetails.findIndex(detail => {
+    return detail.sameUser.some(chat => chat.userId === userId);
+  });
+
+  if (sameUserIndex !== -1) {
+    // If the astrologerId already exists in sameAstrologer array, push the new chat details into it
+    astrologer.chatDetails[sameUserIndex].sameUser.push({
+      name: name,
+      userId: userId,
+      date: date,
+      chatTime: chatTime,
+      earnedAmount: earnedAmount,
+    });
+  } else {
+    // If the astrologerId doesn't exist in sameAstrologer array, create a new entry
+    astrologer.chatDetails.push({
+      sameUser: [{
+        name: name,
+        userId: userId,
+        date: date,
+        chatTime: chatTime,
+        earnedAmount: earnedAmount,
+      }],
+    });
+  }
+
+  // Update astrologer's balance by adding the earnedAmount
+  astrologer.wallet.push(earnedAmount);
+  astrologer.balance = astrologer.wallet.reduce((acc, val) => acc + parseFloat(val), 0);
+  await astrologer.save();
+
+  res.status(200).json({
+    success: true,
+    astrologer,
+  });
+});
+exports.paytoAstrologer = async (req, res, next) => {
+  try {
+    const { id, amount, date, totalChatTime } = req.body;
+
+    // Find the astrologer by ID
+    const astrologer = await Astrologer.findById(id);
+
+    // Push payout history
+    astrologer.payOutHistory.push({ amount: amount, date: date, totalChatTime:totalChatTime });
+
+    // Update balance to 0
+    astrologer.wallet = 0;
+    astrologer.balance = 0;
+
+    // Set chat time to 0 for each chat detail
+    astrologer.chatDetails.forEach(chatDetail => {
+      chatDetail.sameUser.forEach(user => {
+        user.chatTime = 0;
+      });
+    });
+
+    // Save changes to the database
+    await astrologer.save();
+
+    // Send the updated astrologer object as response
+    res.status(200).json(astrologer);
+  } catch (error) {
+    // Handle errors
+    console.error("Error occurred while processing payout:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

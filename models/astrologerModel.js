@@ -164,7 +164,51 @@ latestMessage:{
 isBusy:{
   type:Boolean,
   
+},
+chatDetails:[{
+  sameUser:[
+    {
+      name:{
+        type:String
+      },
+      userId:{
+       type:String
+      },
+      date:{
+        type:String
+      },
+      chatTime:{
+        type:String
+      },
+      earnedAmount:{
+         type:String
+      }
+    }
+  ],
+
 }
+],
+wallet:[{
+  type:String
+}],
+balance :{
+  type:String
+},
+payOutHistory:[
+  {
+    amount:{
+      type:String
+  },
+  date:{
+    type:String
+  },
+  totalChatTime:{
+    type:String
+  }
+
+}
+]
+
 });
 
 

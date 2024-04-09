@@ -66,7 +66,7 @@ type:String
       rechargePrice: [
         {
           name:{
-   type:String
+          type:String
           },
           price: {
             type: String, 
@@ -78,7 +78,7 @@ type:String
       ],
       
     balance:{
-      type:Number
+      type:Array
     },
    referralCode:{
       type:String,
@@ -86,27 +86,47 @@ type:String
       allowNull: true
     },
     welcomeBonus:{
-      type:String
+      type:String,
+      date: {
+        type: Date,
+      },
     },
-    welcomeRefBonus:{type:String},
-    referedAmount:{type:String},
+    welcomeRefBonus:{type:String,
+      date: {
+        type: Date,
+      },},
+    referedAmount:{type:String,
+      date: {
+        type: Date,
+      },},
     referedUsersCount:{
       type:String
     },
     chatDetails:[{
-      astrologer:{
-        type:String
-      },
-      date:{
-        type:String
-      },
-      chatTime:{
-        type:String
-      },
-      spentAmount:{
-         type:String
-      }
+      sameAstrologer:[
+        {
+          astrologer:{
+            type:String
+          },
+          astrologerId:{
+           type:String
+          },
+          date:{
+            type:String
+          },
+          chatTime:{
+            type:String
+          },
+          spentAmount:{
+             type:String
+          }
+        }
+      ],
+ 
     }
+
+   
+    
    
     ],
 },{
