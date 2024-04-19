@@ -14,7 +14,11 @@ const messageSchema = new mongoose.Schema({
 
 message:{
    type:String,
-   required:true
+   // required:true
+},
+audio:{
+   type:Object,
+   // required:true
 },
 createdAt:{
    type: Date, // Corrected type to Date

@@ -23,7 +23,7 @@ connectDatabase();
 
 const seedProducts = async () => {
   try {
-    await Client.deleteMany();
+    await Message.deleteMany();
     console.log("All user deleted");
   } catch (error) {
     console.log(error.message);

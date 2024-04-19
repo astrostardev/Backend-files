@@ -5,20 +5,17 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 const Chat = require("../models/chatModel");
 const Message = require("../models/messageModel");
-
-const connectedClients = []; // Initialize array to store connected clients
+const { Readable } = require('stream');
 
 const broadcastMessage = (message) => {
-  connectedClients.forEach((client) => {
+  wss.clients.forEach((client) => {
     client.send(JSON.stringify(message));
-    console.log("brodcast message", message);
+    console.log("broadcast message", message);
   });
 };
+
 wss.on("connection", (ws) => {
   console.log("Client connected");
-
-  
-  connectedClients.push(ws);
 
   ws.on("message", async (message) => {
     const data = JSON.parse(message);
@@ -58,9 +55,10 @@ wss.on("connection", (ws) => {
 
       case "new message":
         ws.room = data.room;
-        const chat = data.message;
-        const roomId = data.room;
-        const userId = data.userId;
+        var chat = data.message;
+        var audio = data.audio
+        var roomId = data.room;
+        var userId = data.userId;
 
         // Save the new message to the database asynchronously
         try {
@@ -77,28 +75,50 @@ wss.on("connection", (ws) => {
             receiverId: roomId,
             message: chat,
           });
+          let newAudio = new Message({
+            senderId: userId,
+            receiverId: roomId,
+            audio: audio,
+          });
 
           if (newMessage) {
             conversation.messages.push(newMessage._id);
           }
+          if (newAudio) {
+            conversation.messages.push(newAudio._id);
+          }
           console.log("new message", newMessage);
+          console.log("new message", newAudio);
+
           await Promise.all([conversation.save(), newMessage.save()]);
 
           // Broadcast the new message to all connected clients
-          broadcastMessage({
-            type: "new message",
-            message: chat,
-            receiverId: roomId,
-            senderId: userId,
-            createdAt: Date.now(),
-          });
+          if(newMessage){
+            broadcastMessage({
+              type: "new message",
+              message: chat,
+              receiverId: roomId,
+              senderId: userId,
+              createdAt: Date.now(),
+            });
+          }
+          if(newAudio){
+            broadcastMessage({
+              type: "new message",
+              audio:audio,
+              receiverId: roomId,
+              senderId: userId,
+              createdAt: Date.now(),
+            });
+          }
+        
         } catch (error) {
           console.error("Error saving message:", error);
           // Handle error appropriately
         }
 
         // Send a "get messages" request to retrieve updated messages
-        connectedClients.forEach((client) => {
+        wss.clients.forEach((client) => {
           client.send(
             JSON.stringify({
               type: "get messages",
@@ -109,6 +129,71 @@ wss.on("connection", (ws) => {
         });
         break;
 
+    // case "new audio":
+    //     ws.room = data.room;
+    //     var roomId = data.room;
+    //     var userId = data.userId;
+    //      console.log('senderId',userId);
+    //      console.log('userId',roomId);
+
+    //      const audio = data.audio;
+    //     // Save the new message to the database asynchronously
+    //     try {
+    //       let conversation = await Chat.findOne({
+    //         participants: { $all: [userId, roomId] },
+    //       });
+    //       if (!conversation) {
+    //         conversation = await Chat.create({
+    //           participants: [userId, roomId],
+    //         });
+    //       }
+    //       let newMessage = new Message({
+    //         senderId: userId,
+    //         receiverId: roomId,
+    //         audio: audio,
+    //       });
+
+    //       if (newMessage) {
+    //         conversation.messages.push(newMessage._id);
+    //       }
+    //       console.log("new message", newMessage);
+    //       await Promise.all([conversation.save(), newMessage.save()]);
+
+    //       // Broadcast the new message to all connected clients
+    //       broadcastMessage({
+    //         type: "new message",
+    //         audio:audio,
+    //         receiverId: roomId,
+    //         senderId: userId,
+    //         createdAt: Date.now(),
+    //       });
+    //     } catch (error) {
+    //       console.error("Error saving message:", error);
+    //       // Handle error appropriately
+    //     }
+
+    //     // Send a "get messages" request to retrieve updated messages
+    //     wss.clients.forEach((client) => {
+    //       client.send(
+    //         JSON.stringify({
+    //           type: "get messages",
+    //           room: roomId,
+    //           userId: userId,
+    //         })
+    //       );
+    //     });
+    //     break;
+
+
+    //   // case "audioStream":
+    //   //   // Broadcast the audio data to all connected clients except the sender
+    //   //   wss.clients.forEach((client) => {
+    //   //     if (client !== ws && client.readyState === WebSocket.OPEN) {
+    //   //       client.send(data.audioData);
+    //   //     }
+    //   //   });
+    //     break;
+
       default:
         console.log("Unknown message type:", data.type);
     }
@@ -116,12 +201,6 @@ wss.on("connection", (ws) => {
 
   ws.on("close", () => {
     console.log("Client disconnected");
-
-    // Remove the disconnected WebSocket from connectedClients array
-    const index = connectedClients.indexOf(ws);
-    if (index !== -1) {
-      connectedClients.splice(index, 1);
-    }
   });
 });
 
