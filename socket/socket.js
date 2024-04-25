@@ -143,27 +143,27 @@ wss.on("connection", (ws) => {
         const audio = data.audio;
         // Save the new message to the database asynchronously
         try {
-          let conversation = await Chat.findOne({
-            participants: { $all: [userId, roomId] },
-          });
-          if (!conversation) {
-            conversation = await Chat.create({
-              participants: [userId, roomId],
-            });
-          }
-          let newMessage = new Message({
-            senderId: userId,
-            receiverId: roomId,
-            audio: audio,
-          });
+          // let conversation = await Chat.findOne({
+          //   participants: { $all: [userId, roomId] },
+          // });
+          // if (!conversation) {
+          //   conversation = await Chat.create({
+          //     participants: [userId, roomId],
+          //   });
+          // }
+          // let newMessage = new Message({
+          //   senderId: userId,
+          //   receiverId: roomId,
+          //   audio: audio,
+          // });
 
-          if (newMessage) {
-            conversation.messages.push(newMessage._id);
-          }
-          console.log("new message", newMessage);
-          await Promise.all([conversation.save(), newMessage.save()]);
+          // if (newMessage) {
+          //   conversation.messages.push(newMessage._id);
+          // }
+          // console.log("new message", newMessage);
+          // await Promise.all([conversation.save(), newMessage.save()]);
 
-          // Broadcast the new message to all connected clients
+          // // Broadcast the new message to all connected clients
           broadcastMessage({
             type: "new message",
             audio:audio,

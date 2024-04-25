@@ -6,8 +6,34 @@ const dotenv =require('dotenv')
 const path = require('path')
 const cookieParser =require('cookie-parser');
 const requestIp = require('request-ip');
+const mongoose = require("mongoose");
+const GridFSBucket = mongoose.mongo.GridFSBucket;
 dotenv.config({path:path.join(__dirname,'process.env')})
 const app = express()
+const audioBucket = new GridFSBucket(mongoose.connection, {
+  bucketName: "audioFiles",
+});
+
+// Create an HTTP endpoint to stream audio
+app.get("/audio/:fileId", (req, res) => {
+  const fileId = req.params.fileId;
+  console.log('app File Id', fileId);
+  const downloadStream = audioBucket.openDownloadStream(mongoose.Types.ObjectId(fileId));
+
+  res.setHeader("Content-Type", "audio/mpeg"); // Set the appropriate content type for audio
+
+  downloadStream.on("data", (chunk) => {
+    res.write(chunk);
+  });
+
+  downloadStream.on("end", () => {
+    res.end();
+  });
+
+  downloadStream.on("error", () => {
+    res.status(404).send("File not found");
+  });
+});
 
 app.use(express.json());
 app.use(cookieParser());

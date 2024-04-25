@@ -2,6 +2,7 @@ const catchAsyncError = require('../middlewares/catchAsyncError')
 const Astrologer = require('../models/astrologerModel')
 const Chat = require('../models/chatModel')
 const Message = require('../models/messageModel')
+const { loginAdmin } = require('./adminController')
 
 exports.allMessages = catchAsyncError(async(req,res, next)=>{
 try{
@@ -189,3 +190,61 @@ exports.getUserlatestMessages = async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 }
+exports.uploadAudioFile = async (req, res) => {
+    const { from, to } = req.body;
+    console.log("Request Body:", req.body);
+    
+    let BASE_URL = process.env.BACKEND_URL;
+    if (process.env.NODE_ENV === "production") {
+      BASE_URL = `${req.protocol}://${req.get("host")}`;
+    }
+  
+    try {
+      // Ensure req.file is defined (audio file from Multer)
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: "No audio file uploaded",
+        });
+      }
+  console.log('filename',req.file.filename);
+      // Construct the audio file URL
+      const audioUrl = `${req.protocol}://${req.get("host")}/uploads/messages/audioMessage/${req.file.filename}`;
+
+    
+  
+      // Find or create a conversation
+      let conversation = await Chat.findOne({
+        participants: { $all: [from, to] },
+      });
+  
+      if (!conversation) {
+        conversation = await Chat.create({
+          participants: [from, to],
+        });
+      }
+  
+      // Create a new message with the audio URL
+      const newMessage = new Message({
+        senderId: from,
+        receiverId: to,
+        audio: audioUrl, // Store the audio URL
+      });
+  
+      // Save the message and update the conversation
+      conversation.messages.push(newMessage._id);
+      await Promise.all([conversation.save(), newMessage.save()]);
+  
+      res.status(201).json({
+        success: true,
+        newMessage,
+      });
+    } catch (err) {
+      console.error("Error uploading audio:", err);
+      res.status(500).json({
+        success: false,
+        message: "Error uploading audio",
+      });
+    }
+  };
+  

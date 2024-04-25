@@ -16,10 +16,9 @@ message:{
    type:String,
    // required:true
 },
-audio:{
-   type:Object,
-   // required:true
-},
+audio: {
+   type: String, // Store a reference to the audio (like a URL or path)
+ },
 createdAt:{
    type: Date, // Corrected type to Date
    default: Date.now // Default value set to current date/time
